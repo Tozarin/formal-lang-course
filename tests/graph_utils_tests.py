@@ -1,3 +1,5 @@
+import pytest
+
 from filecmp import cmp
 from project.utils.graph_utils import *
 from networkx import algorithms, is_isomorphic
