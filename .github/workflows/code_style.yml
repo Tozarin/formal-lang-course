@@ -42,7 +42,6 @@ jobs:
 
         # Runs command-line programs using the operating system's shell
         run: |
-          sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config
           python -m pip install --upgrade pip wheel setuptools
           python -m pip install -r requirements.txt
           python -m pip list
