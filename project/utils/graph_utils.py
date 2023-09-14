@@ -29,4 +29,4 @@ def gen_labeled_two_cycles_graph(
 
 
 def save_as_dot(graph: MultiDiGraph, path: str):
-    drawing.nx_pydot.to_pydot(graph).write_raw(path)
+    drawing.nx_agraph.write_dot(graph, path)
