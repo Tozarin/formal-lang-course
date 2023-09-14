@@ -65,9 +65,20 @@ jobs:
         with:
           python-version: '3.8'
 
+      - name: Install choco
+        run: |
+          Set-ExecutionPolicy AllSigned
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) 
+
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
+          choco install graphviz
+          python -m pip install --use-pep517 `
+              --config-setting="--global-option=build_ext" `
+              --config-setting="--global-option="-IC:\Program Files\Graphviz\include" `
+              --config-setting="--global-option="-LC:\Program Files\Graphviz\lib" `
+              pygraphviz
           python -m pip install -r requirements.txt
 
       - name: Run tests
