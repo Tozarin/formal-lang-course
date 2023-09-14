@@ -29,7 +29,6 @@ jobs:
         run: |
           python ./scripts/run_tests.py
 
-jobs:
   build-on-macos:
 
     runs-on: macos-latest
