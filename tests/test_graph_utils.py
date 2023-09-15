@@ -1,10 +1,14 @@
 import pytest
 
-import project.utils.graph_utils
-
 from cfpq_data import labeled_two_cycles_graph
 from filecmp import cmp
 from networkx import algorithms, is_isomorphic
+
+from project.utils.graph_utils import (
+    get_info,
+    gen_labeled_two_cycles_graph,
+    save_as_dot,
+)
 
 path_to_results = "tests/results/"
 

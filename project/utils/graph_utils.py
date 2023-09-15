@@ -1,5 +1,4 @@
-import cfpq_data
-
+from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
 from typing import Tuple
 from collections import namedtuple
