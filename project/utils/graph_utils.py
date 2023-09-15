@@ -1,6 +1,6 @@
 from cfpq_data import *
 from networkx import MultiDiGraph, drawing
-from typing import Tuple
+from typing import Tuple, Set
 from collections import namedtuple
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
@@ -21,17 +21,15 @@ def get_info(name: str) -> Info:
 
     return Info(graph.number_of_nodes(), graph.number_of_edges(), marks)
 
-def get_edges_unique_by_marks(graph: MultiDiGraph) -> set[Tuple[any, any, any]]:
+
+def get_edges_unique_by_marks(graph: MultiDiGraph) -> Set[Tuple[any, any, any]]:
     return set(
         map(
-            (lambda e:
-                if "label" in e[2].keys():
-                    (e[0], e[2]["label"], e[1])
-                else:
-                    None), graph.edges.data()
-
+            lambda e: (e[0], e[2]["label"], e[1]) if "label" in e[2].keys() else None,
+            graph.edges.data(),
         )
     )
+
 
 def gen_labeled_two_cycles_graph(
     fst_num_nodes: int, snd_num_nodes: int, marks: Tuple[str, str]
