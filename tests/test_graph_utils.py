@@ -1,8 +1,9 @@
 import pytest
 
+import project.utils.graph_utils
+
 from cfpq_data import labeled_two_cycles_graph
 from filecmp import cmp
-from project.utils.graph_utils import *
 from networkx import algorithms, is_isomorphic
 
 path_to_results = "tests/results/"

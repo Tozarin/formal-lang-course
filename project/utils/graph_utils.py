@@ -1,4 +1,5 @@
-from cfpq_data import *
+import cfpq_data
+
 from networkx import MultiDiGraph, drawing
 from typing import Tuple
 from collections import namedtuple
