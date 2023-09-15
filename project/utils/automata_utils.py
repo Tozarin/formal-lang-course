@@ -1,20 +1,28 @@
 from pyformlang.regular_expression import Regex
-from pyformlang.finite_automaton import DeterministicFiniteAutomaton, NondeterministicFiniteAutomaton, State
+from pyformlang.finite_automaton import (
+    DeterministicFiniteAutomaton,
+    NondeterministicFiniteAutomaton,
+    State,
+)
 from networkx import MultiDiGraph
-from graph_utils import get_edges_unique_by_marks
+from utils.graph_utils import get_set_of_edges
+
 
 class AutomataExepction(Exception):
-
-    def __init__(self, msg: str)
+    def __init__(self, msg: str):
         self.message = msg
+
 
 def gen_min_dfa_by_reg(reg: Regex) -> DeterministicFiniteAutomaton:
     return reg.to_epsilon_nfa().minimize()
 
-def gen_nfa_by_graph(graph: MultiDiGraph, start_vs: set = None, fin_vs: set = None) -> NondeterministicFiniteAutomaton:
-    
+
+def gen_nfa_by_graph(
+    graph: MultiDiGraph, start_vs: set = None, fin_vs: set = None
+) -> NondeterministicFiniteAutomaton:
+
     nfa = NondeterministicFiniteAutomaton()
-    nfa.add_transitions(get_edges_unique_by_marks(graph))
+    nfa.add_transitions(get_set_of_edges(graph))
 
     nodes = set(graph)
 

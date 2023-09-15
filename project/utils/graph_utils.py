@@ -22,7 +22,7 @@ def get_info(name: str) -> Info:
     return Info(graph.number_of_nodes(), graph.number_of_edges(), marks)
 
 
-def get_edges_unique_by_marks(graph: MultiDiGraph) -> Set[Tuple[any, any, any]]:
+def get_set_of_edges(graph: MultiDiGraph) -> Set[Tuple[any, any, any]]:
     return set(
         map(
             lambda e: (e[0], e[2]["label"], e[1]) if "label" in e[2].keys() else None,
