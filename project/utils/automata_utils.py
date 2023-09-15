@@ -14,12 +14,35 @@ class AutomataExepction(Exception):
 
 
 def gen_min_dfa_by_reg(reg: Regex) -> DeterministicFiniteAutomaton:
+
+    """
+    Generate minimal deterministic finite automaton by regular expression
+
+    Args:
+        reg: regular expression that automata would recognize
+
+    Returns:
+        Genereted automata
+    """
+
     return reg.to_epsilon_nfa().minimize()
 
 
 def gen_nfa_by_graph(
     graph: MultiDiGraph, start_vs: set = None, fin_vs: set = None
 ) -> NondeterministicFiniteAutomaton:
+
+    """
+    Generate nondeterministic finite automaton by graph with given start and finale states
+
+    Args:
+        graph: graph that would be base for automata
+        start_vs: set of vertexes that would be start states
+        fin_vs: set of vertexes that would be finale states
+
+    Returns:
+        Genereted automata
+    """
 
     nfa = NondeterministicFiniteAutomaton()
     nfa.add_transitions(get_set_of_edges(graph))
