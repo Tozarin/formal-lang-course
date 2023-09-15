@@ -72,3 +72,19 @@ def test_save_as_dot():
     save_as_dot(gr, path_to_generated)
 
     assert cmp(path_to_generated, path_to_sample, shallow=False)
+
+
+def test_get_edges_unique_by_marks():
+
+    gr = gen_labeled_two_cycles_graph(2, 2, ("a", "b"))
+    ls = get_set_of_edges(gr)
+
+    assert ls == {
+        (0, "b", 3),
+        (2, "a", 0),
+        (0, "a", 1),
+        (4, "b", 0),
+        (1, "a", 2),
+        (3, "b", 4),
+        (4, "b", 0),
+    }
