@@ -2,10 +2,16 @@ import pytest
 
 from cfpq_data import labeled_two_cycles_graph
 from filecmp import cmp
-from project.utils.graph_utils import *
 from networkx import algorithms, is_isomorphic
 
-path_to_results = "tests/results/"
+from project.utils.graph_utils import (
+    get_info,
+    gen_labeled_two_cycles_graph,
+    get_graph,
+    save_as_dot,
+    get_set_of_edges,
+)
+from common_info import path_to_results
 
 sample_info = get_info("skos")
 

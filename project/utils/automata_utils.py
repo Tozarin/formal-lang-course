@@ -5,7 +5,8 @@ from pyformlang.finite_automaton import (
     State,
 )
 from networkx import MultiDiGraph
-from utils.graph_utils import get_set_of_edges
+
+from project.utils.graph_utils import get_set_of_edges
 
 
 class AutomataExepction(Exception):
