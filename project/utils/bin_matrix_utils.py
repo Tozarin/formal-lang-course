@@ -7,6 +7,11 @@ BinaryMatrix = namedtuple(
 )
 
 
+class BinaryMatrixExepction(Exception):
+    def __init__(self, msg: str):
+        self.message = msg
+
+
 def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
 
     """
@@ -17,7 +22,7 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
         nfa: nondeterministic automaton that would be base
 
     Returns:
-        BinaryMarix - namedtyple that contains starting states, final states,
+        BinaryMatrix - namedtyple that contains starting states, final states,
         dictionary that mathes indexes of binnary matrix and numbers of states,
         decomposition of binary matrix
     """
@@ -53,7 +58,7 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
     return BinaryMatrix(nfa.start_states, nfa.final_states, indexes, matrix)
 
 
-def build_nfa_by_bm(bin_matrix: BinaryMarix) -> NondeterministicFiniteAutomaton:
+def build_nfa_by_bm(bin_matrix: BinaryMatrix) -> NondeterministicFiniteAutomaton:
 
     """
     Builds nondeterministic automaton by given binary matrix
@@ -83,3 +88,37 @@ def build_nfa_by_bm(bin_matrix: BinaryMarix) -> NondeterministicFiniteAutomaton:
         nfa.add_final_state(indexes(State(final_state)))
 
     return nfa
+
+
+def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
+
+    """
+    Calculates transitive closure of graph that is represented by binary matrix
+
+    Args:
+        bin_matrix: namedtyple with necessary information
+
+    Returns:
+        Transitive closure of graph
+    """
+
+    if not bin_matrix.matrix.values():
+        raise BinaryMatrixExepction("Given binary matrix is empty")
+
+    transitive_closure = sum(bin_matrix.matrix.values())
+
+    prev_count_of_nonzero_elems = transitive_closure.count_nonzero()
+    curr_count_of_nonzero_elems = 0
+
+    while prev_count_of_nonzero_elems != curr_count_of_nonzero_elems:
+        transitive_closure += transitive_closure @ transitive_closure
+        prev_count_of_nonzero_elems, curr_count_of_nonzero_elems = (
+            curr_count_of_nonzero_elems,
+            transitive_closure.count_nonzero(),
+        )
+
+    return transitive_closure
+
+def intersect_of_graphs(left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix) -> BinaryMatrix:
+
+    return left_bin_matrix
