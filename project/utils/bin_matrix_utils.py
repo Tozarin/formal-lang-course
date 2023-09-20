@@ -1,6 +1,6 @@
 from collections import namedtuple
 from pyformlang.finite_automaton import State
-from scipy.sparse import dok_matrix
+from scipy.sparse import dok_matrix, kron
 
 BinaryMatrix = namedtuple(
     "BinaryMatrix", ["starting_states", "final_states", "indexes", "binary_matrix"]
@@ -119,6 +119,56 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
 
     return transitive_closure
 
-def intersect_of_graphs(left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix) -> BinaryMatrix:
 
-    return left_bin_matrix
+def intersect_of_automata(
+    left_nfa: NondeterministicFiniteAutomaton,
+    right_nfa: NondeterministicFiniteAutomaton,
+) -> NondeterministicFiniteAutomaton:
+
+    """
+    Calculates intersect of given automata
+
+    Args:
+        left_nfa: left side automaton
+        right_nfa: right side automaton
+
+    Returns:
+        Intersect of automata
+    """
+
+    left_bin_matrix, right_bin_matrix = build_bm_by_nfa(left_nfa), build_bm_by_nfa(
+        right_nfa
+    )
+
+    marks = left_bin_matrix.matrix.keys() & right_bin_matrix.matrix.keys()
+
+    matrix = dict()
+    starting_states = set()
+    final_states = set()
+    indexes = {}
+
+    for mark in marks:
+        matrix[mark] = kron(
+            left_bin_matrix.matrix[mark], right_bin_matrix.matrix[mark], format="dok"
+        )
+
+    for left_state, left_index in left_bin_matrix.indexes:
+        for right_state, right_index in right_bin_matrix.indexes:
+            new_state = new_index = (
+                left_index * len(right_bin_matrix.indexes) + right_index
+            )
+            indexes[new_state] = new_index
+
+            if (
+                left_state in left_bin_matrix.starting_states
+                and right_state in right_bin_matrix.starting_states
+            ):
+                starting_states.add(new_state)
+            if (
+                left_state in left_bin_matrix.final_states
+                and right_state in right_bin_matrix.final_states
+            ):
+                final_states.add(new_state)
+
+    rez_bin_matrix = BinaryMatrix(starting_states, final_states, indexes, matrix)
+    return build_nfa_by_bm(rez_bin_matrix)
