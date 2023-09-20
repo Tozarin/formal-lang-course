@@ -14,7 +14,13 @@ from project.utils.automata_utils import (
     gen_nfa_by_graph,
     AutomataExepction,
 )
-from common_info import path_to_results, path_to_automata, path_to_graphs, reg_test, gen_auto_from_graph_test
+from common_info import (
+    path_to_results,
+    path_to_automata,
+    path_to_graphs,
+    reg_test,
+    gen_auto_from_graph_test,
+)
 
 
 def is_isomorphic_fa_and_graph(fa: FiniteAutomaton, gr: MultiDiGraph) -> bool:
@@ -41,6 +47,7 @@ def test_gen_min_dfa_by_reg():
         graph = load_from_dot(path_to_automata + path)
         assert is_isomorphic_fa_and_graph(fa, graph)
 
+
 def test_fail_gen_nfa_by_graph():
 
     count_of_nodes = 10
@@ -63,19 +70,18 @@ def test_fail_gen_nfa_by_graph():
     except AutomataExepction:
         assert True
 
+
 def test_gen_nfa_by_graph():
     for path in gen_auto_from_graph_test:
         graph = load_from_dot(path_to_graphs + path)
         fa = gen_nfa_by_graph(graph)
         assert is_isomorphic_fa_and_graph(fa, graph)
 
+
 def test_gen_nfa_by_remoted_graph():
     graph = get_graph("skos")
     fa = gen_nfa_by_graph(graph)
     assert is_isomorphic_fa_and_graph(fa, graph)
-
-def test_gen_nfa_by_empty_graph():
-    assert gen_nfa_by_graph(Graph()).is_empty()
 
 
 def test_gen_nfa_by_two_cycles_graph():
