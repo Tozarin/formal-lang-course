@@ -2,6 +2,15 @@ from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
 from typing import Tuple, Set
 from collections import namedtuple
+from pyformlang.regular_expression import Regex
+
+from project.utils.automata_utils import gen_min_dfa_by_reg, gen_nfa_by_graph
+from project.utils.bin_matrix_utils import (
+    build_bm_by_nfa,
+    build_nfa_by_bm,
+    transitive_closure,
+    intersect_of_automata,
+)
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
 
@@ -69,9 +78,9 @@ def gen_labeled_two_cycles_graph(
     Creates two cycled graph connected by one node from amount of nodes in cycles and labels
 
     Args:
-        n: amount of nodes in the first cycle without a common node
-        m: amount of nodes in the second cycle without a common node
-        labels: Labels that will be used to mark the edges of the graph
+        fst_num_nodes: amount of nodes in the first cycle without a common node
+        snd_num_nodes: amount of nodes in the second cycle without a common node
+        marks: Labels that will be used to mark the edges of the graph
 
     Returns:
         A graph with two cycles connected by one node with labeled edges
@@ -90,3 +99,32 @@ def save_as_dot(graph: MultiDiGraph, path: str):
     """
 
     drawing.nx_pydot.to_pydot(graph).write_raw(path)
+
+
+def regular_request(
+    graph: MultiDiGraph, starting_vertices: set, final_vertices: set, reg: Regex
+) -> set:
+
+    """
+    From given starting and finale vertices finds pairs that are connected by path satisfying regular expression in given graph
+
+    Args:
+        graph: graph to find paths
+        starting_vertices: set of starting vertices
+        final_vertices: set of finale vertices
+        reg: regular expresiion that paths must satisfy
+
+    Returns:
+        Set of pair of vertices that connected by satisfying path
+    """
+
+    regular_request_automaton = gen_min_dfa_by_reg(reg)
+    graph_automaton = gen_nfa_by_graph(graph, starting_vertices, final_vertices)
+
+    intersect = intersect_of_automata(regular_request_automaton, graph_automaton)
+
+    tran_closure = transitive_closure(build_bm_by_nfa(intersect))
+
+
+
+    return set()

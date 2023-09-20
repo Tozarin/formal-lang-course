@@ -1,5 +1,5 @@
 from collections import namedtuple
-from pyformlang.finite_automaton import State
+from pyformlang.finite_automaton import State, NondeterministicFiniteAutomaton
 from scipy.sparse import dok_matrix, kron
 
 BinaryMatrix = namedtuple(
@@ -33,10 +33,10 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
     matrix = dict()
     nfa_dict = nfa.to_dict()
 
-    count_of_marks = len(nfa.symbols)
+    count_of_marks = len(nfa.states)
 
     for mark in nfa.symbols:
-        tmp_matrix = doc_matrix(count_of_marks, count_of_marks, dtype=Bool)
+        tmp_matrix = dok_matrix((count_of_marks, count_of_marks), dtype=bool)
 
         """
             from  mark to    mark to
@@ -71,21 +71,21 @@ def build_nfa_by_bm(bin_matrix: BinaryMatrix) -> NondeterministicFiniteAutomaton
     """
 
     matrix = bin_matrix.binary_matrix
-    indexes = binary_matrix.indexes
+    indexes = bin_matrix.indexes
 
     nfa = NondeterministicFiniteAutomaton()
 
     for mark in matrix.keys():
-        marked_array = matrix[mark].to_array()
+        marked_array = matrix[mark].toarray()
         for i in range(len(marked_array)):
             for j in range(len(marked_array)):
                 if marked_array[i][j]:
-                    nfa.add_transition(indexes(State(i)), mark, indexes(State(j)))
+                    nfa.add_transition(indexes[State(i)], mark, indexes[State(j)])
 
     for starting_state in bin_matrix.starting_states:
-        nfa.add_start_state(indexes(State(starting_state)))
+        nfa.add_start_state(indexes[State(starting_state)])
     for final_state in bin_matrix.final_states:
-        nfa.add_final_state(indexes(State(final_state)))
+        nfa.add_final_state(indexes[State(final_state)])
 
     return nfa
 
@@ -102,10 +102,11 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
         Transitive closure of graph
     """
 
-    if not bin_matrix.matrix.values():
-        raise BinaryMatrixExepction("Given binary matrix is empty")
+    if not bin_matrix.binary_matrix.values():
+        #raise BinaryMatrixExepction("Given binary matrix is empty")
+        return dok_matrix((1, 1))
 
-    transitive_closure = sum(bin_matrix.matrix.values())
+    transitive_closure = sum(bin_matrix.binary_matrix.values())
 
     prev_count_of_nonzero_elems = transitive_closure.count_nonzero()
     curr_count_of_nonzero_elems = 0
@@ -140,7 +141,7 @@ def intersect_of_automata(
         right_nfa
     )
 
-    marks = left_bin_matrix.matrix.keys() & right_bin_matrix.matrix.keys()
+    marks = left_bin_matrix.binary_matrix.keys() & right_bin_matrix.binary_matrix.keys()
 
     matrix = dict()
     starting_states = set()
@@ -149,11 +150,11 @@ def intersect_of_automata(
 
     for mark in marks:
         matrix[mark] = kron(
-            left_bin_matrix.matrix[mark], right_bin_matrix.matrix[mark], format="dok"
+            left_bin_matrix.binary_matrix[mark], right_bin_matrix.binary_matrix[mark], format="dok"
         )
 
-    for left_state, left_index in left_bin_matrix.indexes:
-        for right_state, right_index in right_bin_matrix.indexes:
+    for left_state, left_index in left_bin_matrix.indexes.items():
+        for right_state, right_index in right_bin_matrix.indexes.items():
             new_state = new_index = (
                 left_index * len(right_bin_matrix.indexes) + right_index
             )
