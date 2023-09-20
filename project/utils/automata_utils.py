@@ -6,6 +6,7 @@ from pyformlang.finite_automaton import (
 )
 from networkx import MultiDiGraph
 
+
 class AutomataExepction(Exception):
     def __init__(self, msg: str):
         self.message = msg
@@ -44,11 +45,16 @@ def gen_nfa_by_graph(
 
     nfa = NondeterministicFiniteAutomaton()
 
-    nfa.add_transitions(set(
-        map(
-            lambda e: (e[0], e[2]["label"], e[1]) if "label" in e[2].keys() else None,
-            graph.edges.data(),
-        )))
+    nfa.add_transitions(
+        set(
+            map(
+                lambda e: (e[0], e[2]["label"], e[1])
+                if "label" in e[2].keys()
+                else None,
+                graph.edges.data(),
+            )
+        )
+    )
 
     nodes = set(graph)
 

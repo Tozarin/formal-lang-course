@@ -125,6 +125,4 @@ def regular_request(
 
     tran_closure = transitive_closure(build_bm_by_nfa(intersect))
 
-
-
     return set()

@@ -103,7 +103,7 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
     """
 
     if not bin_matrix.binary_matrix.values():
-        #raise BinaryMatrixExepction("Given binary matrix is empty")
+        # raise BinaryMatrixExepction("Given binary matrix is empty")
         return dok_matrix((1, 1))
 
     transitive_closure = sum(bin_matrix.binary_matrix.values())
@@ -150,7 +150,9 @@ def intersect_of_automata(
 
     for mark in marks:
         matrix[mark] = kron(
-            left_bin_matrix.binary_matrix[mark], right_bin_matrix.binary_matrix[mark], format="dok"
+            left_bin_matrix.binary_matrix[mark],
+            right_bin_matrix.binary_matrix[mark],
+            format="dok",
         )
 
     for left_state, left_index in left_bin_matrix.indexes.items():
