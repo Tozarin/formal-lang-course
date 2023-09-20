@@ -1,0 +1,3 @@
+digraph  {
+Empty [is_final=False, is_start=True, label=Empty, peripheries=1];
+}

@@ -11,7 +11,7 @@ from project.utils.graph_utils import (
     save_as_dot,
     get_set_of_edges,
 )
-from common_info import path_to_results
+from common_info import path_to_results, path_to_graphs
 
 sample_info = get_info("skos")
 
@@ -72,7 +72,7 @@ def test_gen_labeled_two_cycles_graph():
 
 def test_save_as_dot():
     path_to_generated = path_to_results + "generated_graph.dot"
-    path_to_sample = path_to_results + "sample_graph.dot"
+    path_to_sample = path_to_graphs + "sample_graph.dot"
 
     gr = gen_labeled_two_cycles_graph(2, 2, ("a", "b"))
     save_as_dot(gr, path_to_generated)
