@@ -54,7 +54,10 @@ def get_set_of_edges(graph: MultiDiGraph) -> Set[Tuple[any, any, any]]:
 
 def load_from_dot(path: str) -> MultiDiGraph:
     rez = drawing.nx_pydot.read_dot(path)
-    rez.remove_node("\\n")
+    
+    if "\\n" in rez:
+        rez.remove_node("\\n")
+
     return rez
 
 
