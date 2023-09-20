@@ -13,7 +13,7 @@ reg_test = [
     (r"\*", "asterisk_fin_automata.dot"),
     (r"\(", "left_parent_fin_automata.dot"),
     (r"\)", "right_parent_fin_automata.dot"),
-    (r"\?", "epsilon_fin_automata.dot"),
+    (r"\$", "epsilon_fin_automata.dot"),
 ]
 
 gen_auto_from_graph_test = ["graph_to_gen_automata.dot", "empty_graph.dot"]
