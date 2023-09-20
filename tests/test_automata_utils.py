@@ -38,28 +38,28 @@ def is_isomorphic_fa_and_graph(fa: FiniteAutomaton, gr: MultiDiGraph) -> bool:
 def test_gen_min_dfa_by_reg():
     for reg, path in reg_test:
         fa = gen_min_dfa_by_reg(Regex(reg))
-        gr = load_from_dot(path_to_results + path)
-        assert is_isomorphic_fa_and_graph(fa, gr)
+        graph = load_from_dot(path_to_results + path)
+        assert is_isomorphic_fa_and_graph(fa, graph)
 
 
 def test_fail_gen_nfa_by_graph():
 
     count_of_nodes = 10
-    gr = gen_labeled_two_cycles_graph(
+    graph = gen_labeled_two_cycles_graph(
         count_of_nodes // 2, count_of_nodes // 2, ("a", "b")
     )
 
-    ss = set(gr)
-    ss.add(count_of_nodes + 1)
+    set_of_vertexes = set(graph)
+    set_of_vertexes.add(count_of_nodes + 1)
 
     try:
-        fa = gen_nfa_by_graph(gr, ss, None)
+        fa = gen_nfa_by_graph(graph, set_of_vertexes, None)
         assert False
     except AutomataExepction:
         assert True
 
     try:
-        fa = gen_nfa_by_graph(gr, None, ss)
+        fa = gen_nfa_by_graph(graph, None, set_of_vertexes)
         assert False
     except AutomataExepction:
         assert True
@@ -67,18 +67,18 @@ def test_fail_gen_nfa_by_graph():
 
 def test_gen_nfa_by_graph():
     for path in gen_auto_from_graph_test:
-        gr = load_from_dot(path_to_results + path)
-        fa = gen_nfa_by_graph(gr)
-        assert is_isomorphic_fa_and_graph(fa, gr)
+        graph = load_from_dot(path_to_results + path)
+        fa = gen_nfa_by_graph(graph)
+        assert is_isomorphic_fa_and_graph(fa, graph)
 
 
 def test_gen_nfa_by_remoted_graph():
-    gr = get_graph("skos")
-    fa = gen_nfa_by_graph(gr)
-    assert is_isomorphic_fa_and_graph(fa, gr)
+    graph = get_graph("skos")
+    fa = gen_nfa_by_graph(graph)
+    assert is_isomorphic_fa_and_graph(fa, graph)
 
 
 def test_gen_nfa_by_two_cycles_graph():
-    gr = gen_labeled_two_cycles_graph(2, 2, ("a", "b"))
-    fa = gen_nfa_by_graph(gr, {0}, {1})
-    assert is_isomorphic_fa_and_graph(fa, gr)
+    graph = gen_labeled_two_cycles_graph(2, 2, ("a", "b"))
+    fa = gen_nfa_by_graph(graph, {0}, {1})
+    assert is_isomorphic_fa_and_graph(fa, graph)

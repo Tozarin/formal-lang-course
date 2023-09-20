@@ -30,7 +30,7 @@ def gen_min_dfa_by_reg(reg: Regex) -> DeterministicFiniteAutomaton:
 
 
 def gen_nfa_by_graph(
-    graph: MultiDiGraph, start_vs: set = None, fin_vs: set = None
+    graph: MultiDiGraph, starting_vertices: set = None, final_vertices: set = None
 ) -> NondeterministicFiniteAutomaton:
 
     """
@@ -50,19 +50,19 @@ def gen_nfa_by_graph(
 
     nodes = set(graph)
 
-    if not start_vs:
-        start_vs = nodes
-    if not fin_vs:
-        fin_vs = nodes
+    if not starting_vertices:
+        starting_vertices = nodes
+    if not final_vertices:
+        final_vertices = nodes
 
-    if not start_vs.issubset(nodes):
+    if not starting_vertices.issubset(nodes):
         raise AutomataExepction("Starting nodes are not subset of graph")
-    if not fin_vs.issubset(nodes):
+    if not final_vertices.issubset(nodes):
         raise AutomataExepction("Finale nodes are not subset of graph")
 
-    for s in start_vs:
-        nfa.add_start_state(State(s))
-    for s in fin_vs:
-        nfa.add_final_state(State(s))
+    for vertex in starting_vertices:
+        nfa.add_start_state(State(vertex))
+    for vertex in final_vertices:
+        nfa.add_final_state(State(vertex))
 
     return nfa
