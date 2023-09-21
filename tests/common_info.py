@@ -17,3 +17,13 @@ reg_test = [
 ]
 
 gen_auto_from_graph_test = ["graph_to_gen_automata.dot", "empty_graph.dot"]
+
+nondeterministic_automata_for_build_test = [
+    ([(0, "b", 0), (0, "a", 1), (1, "b", 1), (1, "a", 0)], [0], [1]),
+    (
+        [(0, "b", 0), (0, "a", 1), (1, "b", 1), (1, "a", 0), (0, "c", 1), (1, "d", 0)],
+        [0],
+        [1],
+    ),
+    ([(0, "b", 0), (0, "a", 1), (1, "a", 1), (1, "b", 0), (0, "c", 1)], [0], [0, 1]),
+]
