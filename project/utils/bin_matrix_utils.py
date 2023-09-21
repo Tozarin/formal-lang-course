@@ -33,10 +33,10 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
     matrix = dict()
     nfa_dict = nfa.to_dict()
 
-    count_of_marks = len(nfa.states)
+    count_of_states = len(nfa.states)
 
     for mark in nfa.symbols:
-        tmp_matrix = dok_matrix((count_of_marks, count_of_marks), dtype=bool)
+        tmp_matrix = dok_matrix((count_of_states, count_of_states), dtype=bool)
 
         """
             from  mark to    mark to
@@ -45,17 +45,25 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
         """
         for state_from, transitions in nfa_dict.items():
             states_to = set()
-            for mark in transitions:
-                states = transitions[mark]
-                if isinstance(states, set):
-                    states_to = states
+            if mark in transitions:
+                state = transitions[mark]
+                if isinstance(state, set):
+                    states_to = state
                 else:
-                    states_to = {states}
-                for state_to in states_to:
-                    tmp_matrix[indexes[state_from], indexes[state_to]] = True
+                    states_to = {}
+            for state_to in states_to:
+                tmp_matrix[
+                    indexes[state_from],
+                    indexes[state_to],
+                ] = True
         matrix[mark] = tmp_matrix
 
-    return BinaryMatrix(nfa.start_states, nfa.final_states, indexes, matrix)
+    return BinaryMatrix(
+        nfa.start_states,
+        nfa.final_states,
+        indexes,
+        matrix,
+    )
 
 
 def build_nfa_by_bm(bin_matrix: BinaryMatrix) -> NondeterministicFiniteAutomaton:
@@ -103,8 +111,7 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
     """
 
     if not bin_matrix.matrix.values():
-        # raise BinaryMatrixExepction("Given binary matrix is empty")
-        return dok_matrix((1, 1))
+        raise BinaryMatrixExepction("Given binary matrix is empty")
 
     transitive_closure = sum(bin_matrix.matrix.values())
 
