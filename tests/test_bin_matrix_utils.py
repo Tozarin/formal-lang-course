@@ -24,6 +24,8 @@ def build_nfa(
 
     if not len(transitions_list):
         return rez
+    else:
+        rez.add_transitions(transitions_list)
 
     for state in starting_states:
         rez.add_start_state(State(state))
