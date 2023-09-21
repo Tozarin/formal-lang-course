@@ -2,7 +2,8 @@ import pytest
 
 from cfpq_data import labeled_two_cycles_graph
 from filecmp import cmp
-from networkx import algorithms, is_isomorphic
+from networkx import algorithms, is_isomorphic, MultiDiGraph
+from pyformlang.regular_expression import Regex
 
 from project.utils.graph_utils import (
     get_info,
@@ -10,8 +11,9 @@ from project.utils.graph_utils import (
     get_graph,
     save_as_dot,
     get_set_of_edges,
+    regular_request,
 )
-from common_info import path_to_results, path_to_graphs
+from common_info import path_to_results, path_to_graphs, regular_request_test
 
 sample_info = get_info("skos")
 
@@ -94,3 +96,27 @@ def test_get_edges_unique_by_marks():
         (3, "b", 4),
         (4, "b", 0),
     }
+
+
+def test_regular_request_at_empty_graph():
+
+    graph = MultiDiGraph()
+    for _, _, _, reg, _, _, _ in regular_request_test:
+        assert regular_request(graph, [], [], Regex(reg)) == set()
+
+
+def test_regular_request_at_two_cycles_graph():
+
+    for (
+        fst_num_nodes,
+        snd_num_nodes,
+        marks,
+        reg,
+        starting_states,
+        finale_states,
+        expected_set,
+    ) in regular_request_test:
+        graph = gen_labeled_two_cycles_graph(fst_num_nodes, snd_num_nodes, marks)
+        assert (
+            regular_request(graph, starting_states, finale_states, Regex(reg)) == set()
+        )
