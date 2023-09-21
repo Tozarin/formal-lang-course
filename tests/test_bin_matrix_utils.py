@@ -1,13 +1,14 @@
 import pytest
 
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
+from typing import List
 
 from project.utils.bin_matrix_utils import build_bm_by_nfa, build_nfa_by_bm
 from common_info import nondeterministic_automata_for_build_test
 
 
 def build_nfa(
-    transitions_list: list[tuple], starting_states: set = None, final_states: set = None
+    transitions_list: List[tuple], starting_states: set = None, final_states: set = None
 ) -> NondeterministicFiniteAutomaton:
 
     rez = NondeterministicFiniteAutomaton()
