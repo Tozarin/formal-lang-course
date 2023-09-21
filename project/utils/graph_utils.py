@@ -4,12 +4,15 @@ from typing import Tuple, Set
 from collections import namedtuple
 from pyformlang.regular_expression import Regex
 
-from project.utils.automata_utils import gen_min_dfa_by_reg, gen_nfa_by_graph
+from project.utils.automata_utils import (
+    gen_min_dfa_by_reg,
+    gen_nfa_by_graph,
+    intersect_of_automata,
+)
 from project.utils.bin_matrix_utils import (
     build_bm_by_nfa,
     build_nfa_by_bm,
     transitive_closure,
-    intersect_of_automata,
 )
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
@@ -125,4 +128,16 @@ def regular_request(
 
     tran_closure = transitive_closure(build_bm_by_nfa(intersect))
 
-    return set()
+    rez = set()
+
+    lenght_of_reg_request_matrix = len(
+        build_bm_by_nfa(regular_request_automaton).indexes
+    )
+    for state_from, state_to in zip(*tran_closure.nonzero()):
+        if state_from in starting_vertices and state_to in final_vertices:
+            rez.add(
+                state_from // lenght_of_reg_request_matrix,
+                state_to // lenght_of_reg_request_matrix,
+            )
+
+    return rez

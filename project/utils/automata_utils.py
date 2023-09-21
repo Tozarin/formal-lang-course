@@ -6,7 +6,7 @@ from pyformlang.finite_automaton import (
 )
 from networkx import MultiDiGraph
 
-from project.utils.bin_matrix import (
+from project.utils.bin_matrix_utils import (
     build_bm_by_nfa,
     build_nfa_by_bm,
     intersect_of_automata_by_binary_matixes,
