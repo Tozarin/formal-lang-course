@@ -6,6 +6,12 @@ from pyformlang.finite_automaton import (
 )
 from networkx import MultiDiGraph
 
+from project.utils.bin_matrix import (
+    build_bm_by_nfa,
+    build_nfa_by_bm,
+    intersect_of_automata_by_binary_matixes,
+)
+
 
 class AutomataExepction(Exception):
     def __init__(self, msg: str):
@@ -74,3 +80,30 @@ def gen_nfa_by_graph(
         nfa.add_final_state(State(vertex))
 
     return nfa
+
+
+def intersect_of_automata(
+    left_nfa: NondeterministicFiniteAutomaton,
+    right_nfa: NondeterministicFiniteAutomaton,
+) -> NondeterministicFiniteAutomaton:
+
+    """
+    Calculates intersect of given automata
+
+    Args:
+        left_nfa: left side automaton
+        right_nfa: right side automaton
+
+    Returns:
+        Intersect of automata
+    """
+
+    left_bin_matrix, right_bin_matrix = build_bm_by_nfa(left_nfa), build_bm_by_nfa(
+        right_nfa
+    )
+
+    rez_bin_matrix = intersect_of_automata_by_binary_matixes(
+        left_bin_matrix, right_bin_matrix
+    )
+
+    return build_nfa_by_bm(rez_bin_matrix)

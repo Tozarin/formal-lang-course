@@ -120,7 +120,10 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
 
     return transitive_closure
 
-def intersect_of_automata_by_binary_matixes(left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix) -> BinaryMatrix:
+
+def intersect_of_automata_by_binary_matixes(
+    left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix
+) -> BinaryMatrix:
 
     """
     Calculates intersect of given automata represented as binary matixes
@@ -165,28 +168,4 @@ def intersect_of_automata_by_binary_matixes(left_bin_matrix: BinaryMatrix, right
             ):
                 final_states.add(new_state)
 
-    return BinaryMatrix(starting_states, final_states, indexes, matrix) 
-
-def intersect_of_automata(
-    left_nfa: NondeterministicFiniteAutomaton,
-    right_nfa: NondeterministicFiniteAutomaton,
-) -> NondeterministicFiniteAutomaton:
-
-    """
-    Calculates intersect of given automata
-
-    Args:
-        left_nfa: left side automaton
-        right_nfa: right side automaton
-
-    Returns:
-        Intersect of automata
-    """
-
-    left_bin_matrix, right_bin_matrix = build_bm_by_nfa(left_nfa), build_bm_by_nfa(
-        right_nfa
-    )
-
-    rez_bin_matrix = intersect_of_automata_by_binary_matixes(left_bin_matrix, right_bin_matrix)
-
-    return build_nfa_by_bm(rez_bin_matrix)
+    return BinaryMatrix(starting_states, final_states, indexes, matrix)
