@@ -7,11 +7,6 @@ BinaryMatrix = namedtuple(
 )
 
 
-class BinaryMatrixExepction(Exception):
-    def __init__(self, msg: str):
-        self.message = msg
-
-
 def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
 
     """
@@ -111,7 +106,7 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
     """
 
     if not bin_matrix.matrix.values():
-        raise BinaryMatrixExepction("Given binary matrix is empty")
+        return dok_matrix((1, 1))
 
     transitive_closure = sum(bin_matrix.matrix.values())
 
