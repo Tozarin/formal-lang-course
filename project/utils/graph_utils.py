@@ -5,11 +5,16 @@ from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
 from pyformlang.regular_expression import Regex
 
-from project.utils.automata_utils import (gen_min_dfa_by_reg, gen_nfa_by_graph,
-                                          intersect_of_automata)
-from project.utils.bin_matrix_utils import (build_binary_matrix_by_nfa,
-                                            build_nfa_by_binary_matrix,
-                                            transitive_closure)
+from project.utils.automata_utils import (
+    gen_min_dfa_by_reg,
+    gen_nfa_by_graph,
+    intersect_of_automata,
+)
+from project.utils.bin_matrix_utils import (
+    build_binary_matrix_by_nfa,
+    build_nfa_by_binary_matrix,
+    transitive_closure,
+)
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
 

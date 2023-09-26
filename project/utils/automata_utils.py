@@ -1,12 +1,16 @@
 from networkx import MultiDiGraph
-from pyformlang.finite_automaton import (DeterministicFiniteAutomaton,
-                                         NondeterministicFiniteAutomaton,
-                                         State)
+from pyformlang.finite_automaton import (
+    DeterministicFiniteAutomaton,
+    NondeterministicFiniteAutomaton,
+    State,
+)
 from pyformlang.regular_expression import Regex
 
 from project.utils.bin_matrix_utils import (
-    build_binary_matrix_by_nfa, build_nfa_by_binary_matrix,
-    intersect_of_automata_by_binary_matixes)
+    build_binary_matrix_by_nfa,
+    build_nfa_by_binary_matrix,
+    intersect_of_automata_by_binary_matixes,
+)
 
 
 class AutomataExepction(Exception):

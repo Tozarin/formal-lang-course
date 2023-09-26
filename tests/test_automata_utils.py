@@ -1,14 +1,26 @@
 import pytest
-from common_info import (gen_auto_from_graph_test, path_to_automata,
-                         path_to_graphs, path_to_results, reg_test)
+
 from networkx import Graph, MultiDiGraph, algorithms, is_isomorphic
 from pyformlang.finite_automaton import FiniteAutomaton
 from pyformlang.regular_expression import Regex
 
-from project.utils.automata_utils import (AutomataExepction,
-                                          gen_min_dfa_by_reg, gen_nfa_by_graph)
-from project.utils.graph_utils import (gen_labeled_two_cycles_graph, get_graph,
-                                       load_from_dot)
+from project.utils.automata_utils import (
+    AutomataExepction,
+    gen_min_dfa_by_reg,
+    gen_nfa_by_graph,
+)
+from project.utils.graph_utils import (
+    gen_labeled_two_cycles_graph,
+    get_graph,
+    load_from_dot,
+)
+from common_info import (
+    gen_auto_from_graph_test,
+    path_to_automata,
+    path_to_graphs,
+    path_to_results,
+    reg_test,
+)
 
 
 def is_isomorphic_fa_and_graph(fa: FiniteAutomaton, gr: MultiDiGraph) -> bool:

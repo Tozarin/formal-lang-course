@@ -1,14 +1,20 @@
+import pytest
+
 from filecmp import cmp
 
-import pytest
 from cfpq_data import labeled_two_cycles_graph
-from common_info import path_to_graphs, path_to_results, regular_request_test
 from networkx import MultiDiGraph, algorithms, is_isomorphic
 from pyformlang.regular_expression import Regex
 
-from project.utils.graph_utils import (gen_labeled_two_cycles_graph, get_graph,
-                                       get_info, get_set_of_edges,
-                                       regular_request, save_as_dot)
+from project.utils.graph_utils import (
+    gen_labeled_two_cycles_graph,
+    get_graph,
+    get_info,
+    get_set_of_edges,
+    regular_request,
+    save_as_dot,
+)
+from common_info import path_to_graphs, path_to_results, regular_request_test
 
 sample_info = get_info("skos")
 
