@@ -23,7 +23,6 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
         decomposition of binary matrix
     """
 
-    # state of automata, index of binary matrix
     indexes = {state: index for index, state in enumerate(nfa.states)}
 
     matrix = dict()
@@ -34,11 +33,6 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
     for mark in nfa.symbols:
         tmp_matrix = dok_matrix((count_of_states, count_of_states), dtype=bool)
 
-        """
-            from  mark to    mark to
-            0,    { a: 1, 2; b: 2 }
-            1,    { c: 3, 4, ...}
-        """
         for state_from, transitions in nfa_dict.items():
             states_to = set()
             if mark in transitions:
