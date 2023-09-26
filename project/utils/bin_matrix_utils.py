@@ -1,5 +1,6 @@
 from collections import namedtuple
-from pyformlang.finite_automaton import State, NondeterministicFiniteAutomaton
+
+from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
 from scipy.sparse import dok_matrix, kron
 
 BinaryMatrix = namedtuple(

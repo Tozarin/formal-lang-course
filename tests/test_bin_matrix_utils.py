@@ -1,19 +1,14 @@
-import pytest
-
-from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
 from typing import List
+
+import pytest
+from common_info import (nondeterministic_automata_for_build_test,
+                         transitive_closure_test)
+from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
 from scipy.sparse import dok_matrix
 
-from project.utils.bin_matrix_utils import (
-    build_bm_by_nfa,
-    build_nfa_by_bm,
-    transitive_closure,
-)
 from project.utils.automata_utils import intersect_of_automata
-from common_info import (
-    nondeterministic_automata_for_build_test,
-    transitive_closure_test,
-)
+from project.utils.bin_matrix_utils import (build_bm_by_nfa, build_nfa_by_bm,
+                                            transitive_closure)
 
 
 def build_nfa(
