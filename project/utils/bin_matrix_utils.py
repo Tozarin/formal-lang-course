@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
-from scipy.sparse import dok_matrix, kron
+from scipy.sparse import dok_matrix, kron, block_diag, csr_array, lil_array, vstack
 
 BinaryMatrix = namedtuple(
     "BinaryMatrix", ["starting_states", "final_states", "indexes", "matrix"]
@@ -168,3 +168,80 @@ def intersect_of_automata_by_binary_matixes(
                 final_states.add(new_state)
 
     return BinaryMatrix(starting_states, final_states, indexes, matrix)
+
+
+def direct_sum(left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix) -> dict:
+
+    result_matrix = dict()
+    size_of_right_matrix = len(right_bin_matrix.indexes)
+
+    for mark in left_bin_matrix.matrix.keys():
+        result_matrix[mark] = csr_array(
+            block_diag(left_bin_matrix.matrix[mark]),
+            (
+                dok_matrix((size_of_right_matrix, size_of_right_matrix))
+                if mark not in right_bin_matrix.matrix.keys()
+                else right_bin_matrix.matrix[mark]
+            ),
+        )
+
+    return result_matrix
+
+
+def init_front(
+    width: int, high: int, states: dict, starting_states: set, starting_row: lil_array
+) -> csr_array:
+
+    front = lil_array((width, high))
+
+    for state, index in states.items():
+        if state in starting_states:
+            front[index, index] = 1
+            front[index, width:] = starting_row
+
+    return front.tosrc()
+
+
+def init_separeted_front(
+    width: int,
+    high: int,
+    states: dict,
+    starting_states_for_fronts: set,
+    graph_states: dict,
+    starting_states: set,
+) -> (csr_array, list):
+
+    fronts = []
+
+    for starting_state in starting_states:
+        fronts.append(
+            init_front(
+                width,
+                high,
+                states,
+                starting_states_for_fronts,
+                lil_array(
+                    [int(starting_state == state) for state in graph_states.keys()]
+                ),
+            )
+        )
+
+    if len(fronts) > 0:
+        return (csr_array(vstack(fronts)), starting_states.list())
+    else:
+        return (csr_array((width, high)), starting_states.list())
+
+
+def transport_part_of_front(index_to: int, front: csr_array) -> csr_array:
+
+    new_front = lil_array(front.shape)
+
+    for i, j in zip(*front.nonzero()):
+        if j < index_to:
+            non_zero_right_part_of_row = front.getrow(i).tolil()[[0], index_to:]
+            if len(non_zero_right_part_of_row) > 0:
+                row_shift = i // index_to * index_to
+                new_front[row_shift + j, j] = 1
+                new_front[[row_shift + j], index_to:] = non_zero_right_part_of_row
+
+    return new_front.tocsr()
