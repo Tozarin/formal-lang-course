@@ -7,10 +7,11 @@ from networkx import algorithms, is_isomorphic
 from project.utils.graph_utils import (
     get_info,
     gen_labeled_two_cycles_graph,
+    get_graph,
     save_as_dot,
+    get_set_of_edges,
 )
-
-path_to_results = "tests/results/"
+from common_info import path_to_results, path_to_graphs
 
 sample_info = get_info("skos")
 
@@ -71,9 +72,25 @@ def test_gen_labeled_two_cycles_graph():
 
 def test_save_as_dot():
     path_to_generated = path_to_results + "generated_graph.dot"
-    path_to_sample = path_to_results + "sample_graph.dot"
+    path_to_sample = path_to_graphs + "sample_graph.dot"
 
     gr = gen_labeled_two_cycles_graph(2, 2, ("a", "b"))
     save_as_dot(gr, path_to_generated)
 
     assert cmp(path_to_generated, path_to_sample, shallow=False)
+
+
+def test_get_edges_unique_by_marks():
+
+    gr = gen_labeled_two_cycles_graph(2, 2, ("a", "b"))
+    ls = get_set_of_edges(gr)
+
+    assert ls == {
+        (0, "b", 3),
+        (2, "a", 0),
+        (0, "a", 1),
+        (4, "b", 0),
+        (1, "a", 2),
+        (3, "b", 4),
+        (4, "b", 0),
+    }

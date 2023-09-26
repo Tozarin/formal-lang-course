@@ -1,6 +1,6 @@
 from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
-from typing import Tuple
+from typing import Tuple, Set
 from collections import namedtuple
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
@@ -41,6 +41,24 @@ def get_info(name: str) -> Info:
     marks = set([i[2]["label"] for i in graph.edges.data()])
 
     return Info(graph.number_of_nodes(), graph.number_of_edges(), marks)
+
+
+def get_set_of_edges(graph: MultiDiGraph) -> Set[Tuple[any, any, any]]:
+    return set(
+        map(
+            lambda e: (e[0], e[2]["label"], e[1]) if "label" in e[2].keys() else None,
+            graph.edges.data(),
+        )
+    )
+
+
+def load_from_dot(path: str) -> MultiDiGraph:
+    rez = drawing.nx_pydot.read_dot(path)
+
+    if "\\n" in rez:
+        rez.remove_node("\\n")
+
+    return rez
 
 
 def gen_labeled_two_cycles_graph(

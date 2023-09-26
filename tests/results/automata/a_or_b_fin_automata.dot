@@ -1,0 +1,6 @@
+digraph  {
+"1;3;1;5" [is_final=True, is_start=False, label="1;3;1;5", peripheries=2];
+"0;2;4" [is_final=False, is_start=True, label="0;2;4", peripheries=1];
+"0;2;4" -> "1;3;1;5"  [key=0, label=a];
+"0;2;4" -> "1;3;1;5"  [key=1, label=b];
+}
