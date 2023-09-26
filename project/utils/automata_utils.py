@@ -5,7 +5,8 @@ from pyformlang.finite_automaton import (DeterministicFiniteAutomaton,
 from pyformlang.regular_expression import Regex
 
 from project.utils.bin_matrix_utils import (
-    build_bm_by_nfa, build_nfa_by_bm, intersect_of_automata_by_binary_matixes)
+    build_binary_matrix_by_nfa, build_nfa_by_binary_matrix,
+    intersect_of_automata_by_binary_matixes)
 
 
 class AutomataExepction(Exception):
@@ -93,12 +94,12 @@ def intersect_of_automata(
         Intersect of automata
     """
 
-    left_bin_matrix, right_bin_matrix = build_bm_by_nfa(left_nfa), build_bm_by_nfa(
-        right_nfa
-    )
+    left_bin_matrix, right_bin_matrix = build_binary_matrix_by_nfa(
+        left_nfa
+    ), build_binary_matrix_by_nfa(right_nfa)
 
     rez_bin_matrix = intersect_of_automata_by_binary_matixes(
         left_bin_matrix, right_bin_matrix
     )
 
-    return build_nfa_by_bm(rez_bin_matrix)
+    return build_nfa_by_binary_matrix(rez_bin_matrix)

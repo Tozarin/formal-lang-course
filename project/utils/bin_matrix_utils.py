@@ -8,7 +8,7 @@ BinaryMatrix = namedtuple(
 )
 
 
-def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
+def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
 
     """
     Builds decomposition of binary matrix by given nondeterministic automaton
@@ -56,7 +56,9 @@ def build_bm_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
     )
 
 
-def build_nfa_by_bm(bin_matrix: BinaryMatrix) -> NondeterministicFiniteAutomaton:
+def build_nfa_by_binary_matrix(
+    bin_matrix: BinaryMatrix,
+) -> NondeterministicFiniteAutomaton:
 
     """
     Builds nondeterministic automaton by given binary matrix

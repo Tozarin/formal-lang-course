@@ -7,7 +7,8 @@ from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
 from scipy.sparse import dok_matrix
 
 from project.utils.automata_utils import intersect_of_automata
-from project.utils.bin_matrix_utils import (build_bm_by_nfa, build_nfa_by_bm,
+from project.utils.bin_matrix_utils import (build_binary_matrix_by_nfa,
+                                            build_nfa_by_binary_matrix,
                                             transitive_closure)
 
 
@@ -33,7 +34,7 @@ def build_nfa(
 def test_build_empty():
 
     nfa = NondeterministicFiniteAutomaton()
-    assert build_nfa_by_bm(build_bm_by_nfa(nfa)).is_empty()
+    assert build_nfa_by_binary_matrix(build_binary_matrix_by_nfa(nfa)).is_empty()
 
 
 def test_build_from_and_to_bm():
@@ -45,7 +46,9 @@ def test_build_from_and_to_bm():
     ) in nondeterministic_automata_for_build_test:
 
         original_nfa = build_nfa(transitions_list, starting_states, final_states)
-        builded_nfa = build_nfa_by_bm(build_bm_by_nfa(original_nfa))
+        builded_nfa = build_nfa_by_binary_matrix(
+            build_binary_matrix_by_nfa(original_nfa)
+        )
 
         assert builded_nfa.is_equivalent_to(original_nfa)
 
@@ -90,7 +93,7 @@ def test_transitive_closure():
         expected,
     ) in transitive_closure_test:
         nfa = build_nfa(transitions_list, starting_states, final_states)
-        binary_matrix = build_bm_by_nfa(nfa)
+        binary_matrix = build_binary_matrix_by_nfa(nfa)
         geted_closure = transitive_closure(binary_matrix)
         expected_closure = dok_matrix(expected)
 

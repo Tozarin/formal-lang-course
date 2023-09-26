@@ -7,7 +7,8 @@ from pyformlang.regular_expression import Regex
 
 from project.utils.automata_utils import (gen_min_dfa_by_reg, gen_nfa_by_graph,
                                           intersect_of_automata)
-from project.utils.bin_matrix_utils import (build_bm_by_nfa, build_nfa_by_bm,
+from project.utils.bin_matrix_utils import (build_binary_matrix_by_nfa,
+                                            build_nfa_by_binary_matrix,
                                             transitive_closure)
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
@@ -121,12 +122,12 @@ def regular_request(
 
     intersect = intersect_of_automata(regular_request_automaton, graph_automaton)
 
-    tran_closure = transitive_closure(build_bm_by_nfa(intersect))
+    tran_closure = transitive_closure(build_binary_matrix_by_nfa(intersect))
 
     rez = set()
 
     lenght_of_reg_request_matrix = len(
-        build_bm_by_nfa(regular_request_automaton).indexes
+        build_binary_matrix_by_nfa(regular_request_automaton).indexes
     )
     for state_from, state_to in zip(*tran_closure.nonzero()):
         if state_from in starting_vertices and state_to in final_vertices:
