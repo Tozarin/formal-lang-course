@@ -12,13 +12,13 @@ def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMa
 
     """
     Builds decomposition of binary matrix by given nondeterministic automaton
-    and together with other information wraps in typle
+    and together with other information wraps in tuple
 
     Args:
         nfa: nondeterministic automaton that would be base
 
     Returns:
-        BinaryMatrix - namedtyple that contains starting states, final states,
+        BinaryMatrix - namedtuple that contains starting states, final states,
         dictionary that mathes indexes of binnary matrix and numbers of states,
         decomposition of binary matrix
     """
@@ -64,7 +64,7 @@ def build_nfa_by_binary_matrix(
     Builds nondeterministic automaton by given binary matrix
 
     Args:
-        bin_matrix: namedtyple with necessary information
+        bin_matrix: namedtuple with necessary information
 
     Returns:
         Nondeterministic automaton
@@ -96,7 +96,7 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
     Calculates transitive closure of graph that is represented by binary matrix
 
     Args:
-        bin_matrix: namedtyple with necessary information
+        bin_matrix: namedtuple with necessary information
 
     Returns:
         Transitive closure of graph
