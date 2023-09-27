@@ -226,7 +226,6 @@ def init_front(
     for state, index in indexes.items():
         if state in starting_states:
             front[index, index] = 1
-
             for i in range(starting_row.shape[0]):
                 front[index, i + width] = starting_row[0, i]
 
@@ -290,11 +289,11 @@ def sort_left_part_of_front(size_of_left_part: int, front: csr_array) -> csr_arr
     new_front = lil_array(front.shape)
 
     for i, j in zip(*front.nonzero()):
-        if j < index_to:
-            non_zero_right_part_of_row = front.getrow(i).tolil()[[0], index_to:]
+        if j < size_of_left_part:
+            non_zero_right_part_of_row = front.getrow(i).tolil()[[0], size_of_left_part:]
             if len(non_zero_right_part_of_row) > 0:
-                row_shift = i // index_to
+                row_shift = i // size_of_left_part
                 new_front[row_shift + j, j] = 1
-                new_front[[row_shift + j], index_to:] = non_zero_right_part_of_row
+                new_front[[row_shift + j], size_of_left_part:] = non_zero_right_part_of_row
 
     return new_front.tocsr()
