@@ -172,44 +172,88 @@ def intersect_of_automata_by_binary_matixes(
 
 def direct_sum(left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix) -> dict:
 
+    """
+    Direct sum of two binary matrixes that used marks of only left one
+
+    Args:
+        left_bin_matrix: left side matrix
+        right_bin_matrix: right side matrix
+
+    Returns:
+        Dictionary where keys-marks matched with direct sums of corresponding matrixes
+    """
+
     result_matrix = dict()
     size_of_right_matrix = len(right_bin_matrix.indexes)
 
     for mark in left_bin_matrix.matrix.keys():
         result_matrix[mark] = csr_array(
-            block_diag(left_bin_matrix.matrix[mark]),
-            (
-                dok_matrix((size_of_right_matrix, size_of_right_matrix))
-                if mark not in right_bin_matrix.matrix.keys()
-                else right_bin_matrix.matrix[mark]
-            ),
+            block_diag(
+                (
+                    left_bin_matrix.matrix[mark],
+                    (
+                        dok_matrix((size_of_right_matrix, size_of_right_matrix))
+                        if mark not in right_bin_matrix.matrix.keys()
+                        else right_bin_matrix.matrix[mark]
+                    ),
+                )
+            )
         )
 
     return result_matrix
 
 
 def init_front(
-    width: int, high: int, states: dict, starting_states: set, starting_row: lil_array
+    width: int, hight: int, indexes: dict, starting_states: set, starting_row: lil_array
 ) -> csr_array:
 
-    front = lil_array((width, high))
+    """
+    Initiates front matrix for bfs algorithm
 
-    for state, index in states.items():
+    Args:
+        width: width of front matrix
+        hight: hight of front matrix
+        indexes: indexes that matched with states of working matrix
+        starting_states: states that algorithm start from
+        starting_row: default values of working part of front
+
+    Returns:
+        Front matrix
+    """
+
+    front = lil_array((width, hight))
+
+    for state, index in indexes.items():
         if state in starting_states:
             front[index, index] = 1
-            front[index, width:] = starting_row
 
-    return front.tosrc()
+            for i in range(starting_row.shape[0]):
+                front[index, i + width] = starting_row[0, i]
+
+    return front.tocsr()
 
 
 def init_separeted_front(
     width: int,
-    high: int,
-    states: dict,
+    hight: int,
+    indexes: dict,
     starting_states_for_fronts: set,
-    graph_states: dict,
     starting_states: set,
 ) -> (csr_array, list):
+
+    """
+    Initiates front matrixes for separete variant of bfs algorithm
+
+    Args:
+        width: width of front matrix
+        hight: hight of front matrix
+        indexes: indexes that matched with states of working matrix
+        starting_states_for_fronts: starting states for each front
+        starting_states: separeted states that algorithm start from
+
+    Returns:
+        Front matrixes that represented as one matrix with list of starting statesx
+    """
 
     fronts = []
 
@@ -217,22 +261,31 @@ def init_separeted_front(
         fronts.append(
             init_front(
                 width,
-                high,
-                states,
+                hight,
+                indexes,
                 starting_states_for_fronts,
-                lil_array(
-                    [int(starting_state == state) for state in graph_states.keys()]
-                ),
+                lil_array([int(starting_state == state) for state in indexes.keys()]),
             )
         )
 
-    if len(fronts) > 0:
-        return (csr_array(vstack(fronts)), starting_states.list())
-    else:
-        return (csr_array((width, high)), starting_states.list())
+    return (
+        (csr_array(vstack(fronts)) if len(fronts) > 0 else csr_array((width, hight))),
+        list(starting_states),
+    )
 
 
-def transport_part_of_front(index_to: int, front: csr_array) -> csr_array:
+def sort_left_part_of_front(size_of_left_part: int, front: csr_array) -> csr_array:
+
+    """
+    Transport rows for each left part of front to get single matrixes
+
+    Args:
+        size_of_left_part: size of left part of front
+        front: front
+
+    Returns:
+        Sorted front
+    """
 
     new_front = lil_array(front.shape)
 
@@ -240,7 +293,7 @@ def transport_part_of_front(index_to: int, front: csr_array) -> csr_array:
         if j < index_to:
             non_zero_right_part_of_row = front.getrow(i).tolil()[[0], index_to:]
             if len(non_zero_right_part_of_row) > 0:
-                row_shift = i // index_to * index_to
+                row_shift = i // index_to
                 new_front[row_shift + j, j] = 1
                 new_front[[row_shift + j], index_to:] = non_zero_right_part_of_row
 

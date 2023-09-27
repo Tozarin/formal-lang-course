@@ -18,7 +18,7 @@ from project.utils.bin_matrix_utils import (
     direct_sum,
     init_front,
     init_separeted_front,
-    transport_part_of_front,
+    sort_left_part_of_front,
 )
 
 Info = namedtuple("Info", ["num_of_nodes", "num_of_edges", "marks"])
@@ -134,19 +134,19 @@ def regular_request(
 
     tran_closure = transitive_closure(build_binary_matrix_by_nfa(intersect))
 
-    rez = set()
+    result = set()
 
     lenght_of_reg_request_matrix = len(
         build_binary_matrix_by_nfa(regular_request_automaton).indexes
     )
     for state_from, state_to in zip(*tran_closure.nonzero()):
         if state_from in starting_vertices and state_to in final_vertices:
-            rez.add(
+            result.add(
                 state_from // lenght_of_reg_request_matrix,
                 state_to // lenght_of_reg_request_matrix,
             )
 
-    return rez
+    return result
 
 
 def bfs_regular_request(
@@ -156,6 +156,21 @@ def bfs_regular_request(
     final_vertices: set = None,
     separeted_flag: bool = False,
 ) -> set:
+
+    """
+    From given final vertices finds ones that are reachable from given statring vertices by path
+    satisfying regular expression in given graph xor finds such vertices for each starting vertices separetely
+
+    Args:
+        graph: graph to find paths
+        reg: regular expresiion that paths must satisfy
+        starting_vertices: set of starting vertices
+        final_vertices: set of finale vertices
+        separeted_flag: flag that represented what kind of result is required
+
+    Returns:
+        Set of vertices that are reachable xor set of sets of vertices that are reachable
+    """
 
     binary_matrix_of_graph = build_binary_matrix_by_nfa(
         gen_nfa_by_graph(graph, starting_vertices, final_vertices)
@@ -181,7 +196,6 @@ def bfs_regular_request(
             size_of_request + size_of_graph,
             indexes,
             starting_states,
-            indexes,
             starting_states,
         )
     else:
@@ -205,13 +219,13 @@ def bfs_regular_request(
     while True:
         tmp_visited_states = visited_states.copy()
 
-        for matrix in direct_sum.values():
+        for matrix in direct_sum_of_matrixes.values():
             if front is None:
-                part_of_front = visited_states @ matrix
+                new_front = visited_states @ matrix
             else:
-                part_of_front = front @ matrix
+                new_front = front @ matrix
 
-            visited_states += transport_part_of_front(size_of_request, part_of_front)
+            visited_states += sort_left_part_of_front(size_of_request, new_front)
 
         front = None
 
@@ -219,6 +233,7 @@ def bfs_regular_request(
             break
 
     result = set()
+
     graph_indexes = {
         index: state for state, index in binary_matrix_of_graph.indexes.items()
     }
@@ -229,7 +244,7 @@ def bfs_regular_request(
     }
     graph_final_states_indexes = {
         index: state
-        for state, index in binary_matrix_of_graph.items()
+        for state, index in binary_matrix_of_graph.indexes.items()
         if state in binary_matrix_of_graph.final_states
     }
 
@@ -237,13 +252,11 @@ def bfs_regular_request(
         if j >= size_of_request and i % size_of_request in request_final_states_indexes:
             graph_index = j - size_of_request
             if graph_index in graph_final_states_indexes:
-                result.add(
-                    graph_indexes[graph_index]
-                    if not separeted_flag
-                    else (
-                        indexes_of_graph_starting_states[i // size_of_request],
-                        graph_states[graph_index],
+                if not separeted_flag:
+                    result.add(graph_indexes[graph_index])
+                else:
+                    result[indexes_of_graph_starting_states[i // size_of_request]].add(
+                        graph_states[graph_index]
                     )
-                )
 
     return result
