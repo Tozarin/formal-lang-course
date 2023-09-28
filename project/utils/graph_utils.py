@@ -8,7 +8,7 @@ from pyformlang.regular_expression import Regex
 from project.utils.automata_utils import (
     gen_min_dfa_by_reg,
     gen_nfa_by_graph,
-    intersect_of_automata,
+    intersect_of_automata_by_binary_matixes,
 )
 from project.utils.bin_matrix_utils import (
     build_binary_matrix_by_nfa,
@@ -122,23 +122,33 @@ def regular_request(
         Set of pair of vertices that connected by satisfying path
     """
 
-    regular_request_automaton = gen_min_dfa_by_reg(reg)
-    graph_automaton = gen_nfa_by_graph(graph, starting_vertices, final_vertices)
-
-    intersect = intersect_of_automata(regular_request_automaton, graph_automaton)
-
-    tran_closure = transitive_closure(build_binary_matrix_by_nfa(intersect))
-
-    rez = set()
-
-    lenght_of_reg_request_matrix = len(
-        build_binary_matrix_by_nfa(regular_request_automaton).indexes
+    binary_matrix_of_regular_request = build_binary_matrix_by_nfa(
+        gen_min_dfa_by_reg(reg)
     )
+    binary_matrix_of_graph = build_binary_matrix_by_nfa(
+        gen_nfa_by_graph(graph, starting_vertices, final_vertices)
+    )
+
+    intersect = intersect_of_automata_by_binary_matixes(
+        binary_matrix_of_graph, binary_matrix_of_regular_request
+    )
+
+    tran_closure = transitive_closure(intersect)
+
+    result = set()
+    indexes = {i: st for st, i in binary_matrix_of_graph.indexes.items()}
+
+    lenght_of_reg_request_matrix = len(binary_matrix_of_regular_request.indexes)
     for state_from, state_to in zip(*tran_closure.nonzero()):
-        if state_from in starting_vertices and state_to in final_vertices:
-            rez.add(
-                state_from // lenght_of_reg_request_matrix,
-                state_to // lenght_of_reg_request_matrix,
+        if (
+            state_from in intersect.starting_states
+            and state_to in intersect.final_states
+        ):
+            result.add(
+                (
+                    indexes[state_from // lenght_of_reg_request_matrix],
+                    indexes[state_to // lenght_of_reg_request_matrix],
+                )
             )
 
-    return rez
+    return result

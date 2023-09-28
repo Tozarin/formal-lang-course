@@ -40,7 +40,7 @@ def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMa
                 if isinstance(state, set):
                     states_to = state
                 else:
-                    states_to = {}
+                    states_to = {state}
             for state_to in states_to:
                 tmp_matrix[
                     indexes[state_from],

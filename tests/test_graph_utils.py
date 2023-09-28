@@ -119,5 +119,6 @@ def test_regular_request_at_two_cycles_graph():
     ) in regular_request_test:
         graph = gen_labeled_two_cycles_graph(fst_num_nodes, snd_num_nodes, marks)
         assert (
-            regular_request(graph, starting_states, finale_states, Regex(reg)) == set()
+            regular_request(graph, starting_states, finale_states, Regex(reg))
+            == expected_set
         )
