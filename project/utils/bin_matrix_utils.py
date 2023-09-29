@@ -282,7 +282,9 @@ def init_separeted_front(
                 hight,
                 indexes,
                 starting_states_for_fronts,
-                lil_array([[int(starting_state == state) for state in graph_indexes.keys()]]),
+                lil_array(
+                    [[int(starting_state == state) for state in graph_indexes.keys()]]
+                ),
             )
         )
 
