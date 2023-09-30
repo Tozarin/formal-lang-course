@@ -1,0 +1,4 @@
+digraph  {
+1; 
+1 -> 1 [key=0, label=a];
+}

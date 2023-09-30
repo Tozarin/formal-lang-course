@@ -12,9 +12,17 @@ from project.utils.graph_utils import (
     get_info,
     get_set_of_edges,
     regular_request,
+    bfs_regular_request,
     save_as_dot,
+    load_from_dot,
 )
-from common_info import path_to_graphs, path_to_results, regular_request_test
+from common_info import (
+    path_to_graphs,
+    path_to_results,
+    path_to_bfs_test_graphs,
+    regular_request_test,
+    bfs_regular_request_test,
+)
 
 sample_info = get_info("skos")
 
@@ -102,8 +110,8 @@ def test_get_edges_unique_by_marks():
 def test_regular_request_at_empty_graph():
 
     graph = MultiDiGraph()
-    for _, _, _, reg, _, _, _ in regular_request_test:
-        assert regular_request(graph, [], [], Regex(reg)) == set()
+    for _, _, _, regex, _, _, _ in regular_request_test:
+        assert regular_request(graph, {}, {}, Regex(regex)) == set()
 
 
 def test_regular_request_at_two_cycles_graph():
@@ -112,12 +120,59 @@ def test_regular_request_at_two_cycles_graph():
         fst_num_nodes,
         snd_num_nodes,
         marks,
-        reg,
+        regex,
         starting_states,
-        finale_states,
+        final_states,
         expected_set,
     ) in regular_request_test:
         graph = gen_labeled_two_cycles_graph(fst_num_nodes, snd_num_nodes, marks)
         assert (
-            regular_request(graph, starting_states, finale_states, Regex(reg)) == set()
+            regular_request(graph, starting_states, final_states, Regex(regex))
+            == expected_set
+        )
+
+
+def test_bfs_regular_request_at_empty_graph():
+
+    graph = MultiDiGraph()
+    for _, regex, _, _, _, _ in bfs_regular_request_test:
+        for separeted_flag in [True, False]:
+            assert (
+                bfs_regular_request(graph, Regex(regex), {}, {}, separeted_flag)
+                == set()
+            )
+
+
+def test_bfs_regular_separated_request_at_graph():
+
+    for (
+        graph_name,
+        regex,
+        starting_states,
+        final_states,
+        separated_variant_expected_set,
+        _,
+    ) in bfs_regular_request_test:
+        graph = load_from_dot(path_to_bfs_test_graphs + graph_name)
+        assert (
+            bfs_regular_request(
+                graph, Regex(regex), starting_states, final_states, True
+            )
+            == separated_variant_expected_set
+        )
+
+
+def test_bfs_regular_non_separated_request_at_graph():
+    for (
+        graph_name,
+        regex,
+        starting_states,
+        final_states,
+        _,
+        non_separated_variant_expected_set,
+    ) in bfs_regular_request_test:
+        graph = load_from_dot(path_to_bfs_test_graphs + graph_name)
+        assert (
+            bfs_regular_request(graph, Regex(regex), starting_states, final_states)
+            == non_separated_variant_expected_set
         )
