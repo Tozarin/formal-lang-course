@@ -160,6 +160,7 @@ def regular_request(
 
     return result
 
+
 def bfs_regular_request(
     graph: MultiDiGraph,
     reg: Regex,
