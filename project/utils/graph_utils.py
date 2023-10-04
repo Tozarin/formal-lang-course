@@ -9,7 +9,7 @@ from scipy.sparse import lil_array, lil_matrix
 from project.utils.automata_utils import (
     gen_min_dfa_by_reg,
     gen_nfa_by_graph,
-    intersect_of_automata,
+    intersect_of_automata_by_binary_matixes,
 )
 from project.utils.bin_matrix_utils import (
     BinaryMatrix,
@@ -159,7 +159,6 @@ def regular_request(
             )
 
     return result
-
 
 def bfs_regular_request(
     graph: MultiDiGraph,
