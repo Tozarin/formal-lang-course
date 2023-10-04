@@ -1,12 +1,16 @@
-from pyformlang.regular_expression import Regex
+from networkx import MultiDiGraph
 from pyformlang.finite_automaton import (
     DeterministicFiniteAutomaton,
     NondeterministicFiniteAutomaton,
     State,
 )
-from networkx import MultiDiGraph
+from pyformlang.regular_expression import Regex
 
-from project.utils.graph_utils import get_set_of_edges
+from project.utils.bin_matrix_utils import (
+    build_binary_matrix_by_nfa,
+    build_nfa_by_binary_matrix,
+    intersect_of_automata_by_binary_matixes,
+)
 
 
 class AutomataExepction(Exception):
@@ -46,7 +50,17 @@ def gen_nfa_by_graph(
     """
 
     nfa = NondeterministicFiniteAutomaton()
-    nfa.add_transitions(get_set_of_edges(graph))
+
+    nfa.add_transitions(
+        set(
+            map(
+                lambda e: (e[0], e[2]["label"], e[1])
+                if "label" in e[2].keys()
+                else None,
+                graph.edges.data(),
+            )
+        )
+    )
 
     nodes = set(graph)
 
@@ -66,3 +80,30 @@ def gen_nfa_by_graph(
         nfa.add_final_state(State(vertex))
 
     return nfa
+
+
+def intersect_of_automata(
+    left_nfa: NondeterministicFiniteAutomaton,
+    right_nfa: NondeterministicFiniteAutomaton,
+) -> NondeterministicFiniteAutomaton:
+
+    """
+    Calculates intersect of given automata
+
+    Args:
+        left_nfa: left side automaton
+        right_nfa: right side automaton
+
+    Returns:
+        Intersect of automata
+    """
+
+    left_bin_matrix, right_bin_matrix = build_binary_matrix_by_nfa(
+        left_nfa
+    ), build_binary_matrix_by_nfa(right_nfa)
+
+    rez_bin_matrix = intersect_of_automata_by_binary_matixes(
+        left_bin_matrix, right_bin_matrix
+    )
+
+    return build_nfa_by_binary_matrix(rez_bin_matrix)
