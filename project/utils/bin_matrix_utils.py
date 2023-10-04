@@ -314,7 +314,7 @@ def sort_left_part_of_front(
 
     for i, j in zip(*front.nonzero()):
         if j < size_of_left_part:
-            non_zero_row_right_of_row = front[[0]].tolil()[[0], size_of_left_part:]
+            non_zero_row_right_of_row = front[[i]].tolil()[[0], size_of_left_part:]
             if non_zero_row_right_of_row.nnz > 0:
                 row_shift = i // size_of_left_part
                 new_front[row_shift + j, j] = 1
