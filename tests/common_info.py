@@ -1,6 +1,7 @@
 path_to_results = "tests/results/"
 path_to_automata = path_to_results + "automata/"
 path_to_graphs = path_to_results + "graphs/"
+path_to_bfs_test_graphs = path_to_graphs + "bfs_regular_request/"
 
 reg_test = [
     ("", "blanck_fin_automata.dot"),
@@ -94,6 +95,15 @@ regular_request_test = [
     (3, 2, ("a", "b"), "a*|b", {0}, {1, 2, 3, 4}, {(0, 1), (0, 2), (0, 3), (0, 4)}),
     (3, 2, ("a", "b"), "a*|b", {4}, {4, 5}, {(4, 5)}),
     (3, 2, ("a", "b"), "b", {0}, {0, 1, 2, 3}, set()),
-    (3, 2, ("a", "b"), "b", {0}, {4, 5}, {(0, 4)}),
+    (3, 2, ("a", "b"), "b", {0}, {4}, {(0, 4)}),
     (3, 2, ("a", "b"), "", {0}, {4, 5}, set()),
+]
+
+# name_of_graph, regular_expression, starting_states, finale_states, separated_variant_expected_output, non_separated_variant_expected_output
+bfs_regular_request_test = [
+    ("first.dot", "a*", {"1"}, {}, set(), set()),
+    ("second.dot", "a*", {"1"}, {"1"}, {("1", "1")}, {"1"}),
+    ("third.dot", "a*", {"1"}, {"1"}, set(), set()),
+    ("fourth.dot", "a*", {"1"}, {"2", "3"}, {("1", "2"), ("1", "3")}, {"2", "3"}),
+    ("fifth.dot", "a*c", {"1"}, {}, {("1", "3"), ("1", "4")}, {"3", "4"}),
 ]

@@ -1,7 +1,15 @@
 from collections import namedtuple
 
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
-from scipy.sparse import dok_matrix, kron
+from scipy.sparse import (
+    dok_matrix,
+    kron,
+    block_diag,
+    lil_matrix,
+    csr_array,
+    lil_array,
+    vstack,
+)
 
 BinaryMatrix = namedtuple(
     "BinaryMatrix", ["starting_states", "final_states", "indexes", "matrix"]
@@ -31,7 +39,7 @@ def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMa
     count_of_states = len(nfa.states)
 
     for mark in nfa.symbols:
-        tmp_matrix = dok_matrix((count_of_states, count_of_states), dtype=bool)
+        tmp_matrix = lil_matrix((count_of_states, count_of_states), dtype=bool)
 
         for state_from, transitions in nfa_dict.items():
             states_to = set()
@@ -90,7 +98,7 @@ def build_nfa_by_binary_matrix(
     return nfa
 
 
-def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
+def transitive_closure(bin_matrix: BinaryMatrix) -> lil_matrix:
 
     """
     Calculates transitive closure of graph that is represented by binary matrix
@@ -103,7 +111,7 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> dok_matrix:
     """
 
     if not bin_matrix.matrix.values():
-        return dok_matrix((1, 1))
+        return lil_array((1, 1)).tocsr()
 
     transitive_closure = sum(bin_matrix.matrix.values())
 
@@ -146,7 +154,7 @@ def intersect_of_automata_by_binary_matixes(
         matrix[mark] = kron(
             left_bin_matrix.matrix[mark],
             right_bin_matrix.matrix[mark],
-            format="dok",
+            format="csr",
         )
 
     for left_state, left_index in left_bin_matrix.indexes.items():
@@ -168,3 +176,150 @@ def intersect_of_automata_by_binary_matixes(
                 final_states.add(new_state)
 
     return BinaryMatrix(starting_states, final_states, indexes, matrix)
+
+
+def direct_sum(
+    left_bin_matrix: BinaryMatrix,
+    right_bin_matrix: BinaryMatrix,
+) -> dict:
+
+    """
+    Direct sum of two binary matrixes that used marks of only left one
+
+    Args:
+        left_bin_matrix: left side matrix
+        right_bin_matrix: right side matrix
+
+    Returns:
+        Dictionary where keys-marks matched with direct sums of corresponding matrixes
+    """
+
+    result_matrix = dict()
+    size_of_right_matrix = len(right_bin_matrix.indexes)
+
+    for mark in left_bin_matrix.matrix.keys():
+        result_matrix[mark] = csr_array(
+            block_diag(
+                (
+                    left_bin_matrix.matrix[mark],
+                    (
+                        dok_matrix((size_of_right_matrix, size_of_right_matrix))
+                        if mark not in right_bin_matrix.matrix.keys()
+                        else right_bin_matrix.matrix[mark]
+                    ),
+                )
+            )
+        )
+
+    return result_matrix
+
+
+def init_front(
+    width: int,
+    hight: int,
+    indexes: dict,
+    starting_states: set,
+    starting_row: lil_array,
+) -> csr_array:
+
+    """
+    Initiates front matrix for bfs algorithm
+
+    Args:
+        width: width of front matrix
+        hight: hight of front matrix
+        indexes: indexes that matched with states of working matrix
+        starting_states: states that algorithm start from
+        starting_row: default values of working part of front
+
+    Returns:
+        Front matrix
+    """
+
+    front = lil_array((width, hight))
+
+    for state, index in indexes.items():
+        if state in starting_states:
+            front[index, index] = 1
+            front[index, width:] = starting_row
+
+    return front.tocsr()
+
+
+def init_separeted_front(
+    width: int,
+    hight: int,
+    indexes: dict,
+    starting_states_for_fronts: set,
+    graph_indexes: dict,
+    starting_states: set,
+) -> (csr_array, list):
+
+    """
+    Initiates front matrixes for separete variant of bfs algorithm
+
+    Args:
+        width: width of front matrix
+        hight: hight of front matrix
+        indexes: indexes that matched with states of working matrix
+        starting_states_for_fronts: starting states for each front
+        graph_indexes: indexes that matched with states of working graph
+        starting_states: separeted states that algorithm start from
+
+    Returns:
+        Front matrixes that represented as one matrix with list of starting statesx
+    """
+
+    fronts = []
+    list_of_starting_states = []
+
+    for starting_state in starting_states:
+        list_of_starting_states.append(starting_state)
+
+        fronts.append(
+            init_front(
+                width,
+                hight,
+                indexes,
+                starting_states_for_fronts,
+                lil_array(
+                    [[int(starting_state == state) for state in graph_indexes.keys()]]
+                ),
+            )
+        )
+
+    return (
+        csr_array(vstack(fronts)) if len(fronts) > 0 else csr_array((width, hight)),
+        list_of_starting_states,
+    )
+
+
+def sort_left_part_of_front(
+    size_of_left_part: int,
+    front: csr_array,
+) -> csr_array:
+
+    """
+    Transport rows for each left part of front to get single matrixes
+
+    Args:
+        size_of_left_part: size of left part of front
+        front: front
+
+    Returns:
+        Sorted front
+    """
+
+    new_front = lil_array(front.shape)
+
+    for i, j in zip(*front.nonzero()):
+        if j < size_of_left_part:
+            non_zero_row_right_of_row = front[[0]].tolil()[[0], size_of_left_part:]
+            if non_zero_row_right_of_row.nnz > 0:
+                row_shift = i // size_of_left_part
+                new_front[row_shift + j, j] = 1
+                new_front[
+                    [row_shift + j], size_of_left_part:
+                ] += non_zero_row_right_of_row
+
+    return new_front.tocsr()
