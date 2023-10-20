@@ -2,10 +2,13 @@ from pathlib import Path
 
 from pyformlang.cfg import CFG, Variable
 
-def contex_free_to_weak_chomsky_form(contex_free_grammar: str | CFG, start_nonterminal: str = "S") -> CFG:
+
+def contex_free_to_weak_chomsky_form(
+    contex_free_grammar: str | CFG, start_nonterminal: str = "S"
+) -> CFG:
 
     """
-    Converts contex free grammar is reprsented as string or CFG 
+    Converts contex free grammar is reprsented as string or CFG
     to equivalent weak Chomsky form
 
     Args:
@@ -17,15 +20,31 @@ def contex_free_to_weak_chomsky_form(contex_free_grammar: str | CFG, start_nonte
     """
 
     if not isinstance(contex_free_grammar, CFG):
-        contex_free_grammar = CFG.from_text(contex_free_grammar, Variable(start_nonterminal))
-        
-    contex_free_grammar = contex_free_grammar.remove_useless_symbols().eliminate_unit_productions().remove_useless_symbols()
-    productions_to_decompose = contex_free_grammar._get_productions_with_only_single_terminals()
-    contex_free_grammar = contex_free_grammar._decompose_productions(productions_to_decompose)
+        contex_free_grammar = CFG.from_text(
+            contex_free_grammar, Variable(start_nonterminal)
+        )
 
-    return CFG(start_symbol=contex_free_grammar._start_symbol, productions=set(contex_free_grammar))
+    contex_free_grammar = (
+        contex_free_grammar.remove_useless_symbols()
+        .eliminate_unit_productions()
+        .remove_useless_symbols()
+    )
+    productions_to_decompose = (
+        contex_free_grammar._get_productions_with_only_single_terminals()
+    )
+    contex_free_grammar = contex_free_grammar._decompose_productions(
+        productions_to_decompose
+    )
 
-def read_contex_free_grammar_from_file(path_to_grammar: Path, start_nonterminal: str = "S") -> CFG:
+    return CFG(
+        start_symbol=contex_free_grammar._start_symbol,
+        productions=set(contex_free_grammar),
+    )
+
+
+def read_contex_free_grammar_from_file(
+    path_to_grammar: Path, start_nonterminal: str = "S"
+) -> CFG:
 
     """
     Reads contex free grammar from file
@@ -37,7 +56,7 @@ def read_contex_free_grammar_from_file(path_to_grammar: Path, start_nonterminal:
     Returns:
         Readed grammar
     """
-    
+
     with open(path_to_grammar, "r") as file:
         grammar = file.read()
 
