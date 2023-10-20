@@ -45,17 +45,17 @@ def extend_contex_free_grammar(
 
     starting_symbol = (
         contex_free_grammar.start_symbol
-        if contex_free_grammar.starting_symbol is not None
+        if contex_free_grammar.start_symbol is not None
         else Variable("S")
     )
-    nonterminals = set(contex_free_grammar.nonterminals)
+    nonterminals = set(contex_free_grammar.variables)
     nonterminals.add(starting_symbol)
 
     productions: dict[Variable, Regex] = {}
     for production in contex_free_grammar.productions:
         subautomata = Regex(
             " ".join(symbol.value for symbol in production.body)
-            if len(production.body > 0)
+            if len(production.body) > 0
             else "$"
         )
 
@@ -103,14 +103,14 @@ def extended_contex_free_grammar_from_string(
         for token in tokens[2:]:
             if token in ["epsilon", "endpoint"]:
                 continue
-            token = filter(lambda char: char not in "[]()|+*?" ,token)
+            token = filter(lambda char: char not in "[]()|+*?", token)
             for symbol in token:
                 terminals.add(symbol)
 
         nonterminal = tokens[0]
         subautomata = Regex(" ".join(tokens[2:]))
 
-        productions[nonterminal] = subautomata
+        productions[Variable(nonterminal)] = subautomata
         nonterminals.add(nonterminal)
 
     terminals = list(map(lambda symbol: Variable(symbol), terminals - nonterminals))

@@ -3,8 +3,8 @@ from pathlib import Path
 
 from project.grammar.extended_contex_free_grammar import (
     ExtendedContexFreeGrammar,
-    extend_contex_free_grammar_from_string,
-    extend_contex_free_grammar_from_file,
+    extended_contex_free_grammar_from_string,
+    extended_contex_free_grammar_from_file,
 )
 
 RecursiveStateMachine = namedtuple(
@@ -30,12 +30,12 @@ def recursive_state_machine_from_extended_contex_free_grammar(
     """
 
     if isinstance(extended_contex_free_grammar, Path):
-        extended_contex_free_grammar = extend_contex_free_grammar_from_file(
-            extend_contex_free_grammar, starting_symbol
+        extended_contex_free_grammar = extended_contex_free_grammar_from_file(
+            extended_contex_free_grammar, starting_symbol
         )
 
     if isinstance(extended_contex_free_grammar, str):
-        extended_contex_free_grammar = extend_contex_free_grammar_from_file(
+        extended_contex_free_grammar = extended_contex_free_grammar_from_string(
             extended_contex_free_grammar, starting_symbol
         )
 
