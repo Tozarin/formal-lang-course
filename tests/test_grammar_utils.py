@@ -1,3 +1,5 @@
+import pytest
+
 from pyformlang.cfg import CFG, Variable
 
 from project.utils.grammar_utils import (
