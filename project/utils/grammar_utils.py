@@ -32,13 +32,13 @@ def contex_free_to_weak_chomsky_form(
     productions_to_decompose = (
         contex_free_grammar._get_productions_with_only_single_terminals()
     )
-    contex_free_grammar = contex_free_grammar._decompose_productions(
+    new_productions = contex_free_grammar._decompose_productions(
         productions_to_decompose
     )
 
     return CFG(
         start_symbol=contex_free_grammar._start_symbol,
-        productions=set(contex_free_grammar),
+        productions=set(new_productions),
     )
 
 
