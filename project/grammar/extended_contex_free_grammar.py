@@ -1,6 +1,5 @@
 from pathlib import Path
 from collections import namedtuple
-from re import split
 
 from pyformlang.cfg import CFG, Variable
 from pyformlang.regular_expression import Regex
@@ -90,8 +89,8 @@ def extended_contex_free_grammar_from_string(
     string_productions = extend_contex_free_grammar.split("\n")
 
     productions: dict[Variable, Regex] = {}
-    nonterminals = {}
-    terminals = {}
+    nonterminals = set()
+    terminals = set()
     for production in string_productions:
         tokens = production.split(" ")
 
@@ -101,8 +100,10 @@ def extended_contex_free_grammar_from_string(
         if tokens[1] not in ["->"]:
             raise ExtendedContexFreeGrammarExepction("Missing -> in production")
 
-        for symbol in split("[]|+?()*", " ".join(tokens[2:])):
-            terminals.add(symbol)
+        for token in tokens[2:]:
+            token = filter(lambda char: char not in "[]()|+*?" ,token)
+            for symbol in token:
+                terminals.add(symbol)
 
         nonterminal = tokens[0]
         subautomata = Regex(" ".join(tokens[2:]))
@@ -110,11 +111,11 @@ def extended_contex_free_grammar_from_string(
         productions[nonterminal] = subautomata
         nonterminals.add(nonterminal)
 
-    terminals = list(map(lambda x: Value(x), terminals - nonterminals))
-    nonterminals = list(map(lambda x: Value(x)), nonterminals)
+    terminals = list(map(lambda symbol: Variable(symbol), terminals - nonterminals))
+    nonterminals = list(map(lambda symbol: Variable(symbol), nonterminals))
 
     return ExtendedContexFreeGrammar(
-        nonterminals, terminals, Value(starting_symbol), productions
+        nonterminals, terminals, Variable(starting_symbol), productions
     )
 
 
@@ -135,6 +136,6 @@ def extended_contex_free_grammar_from_file(
     """
 
     with open(path_to_file_with_grammar, "r") as file:
-        grammar = file.read()
+        grammar = file.read().trim()
 
     return extend_contex_free_grammar_from_string(grammar, starting_symbol)
