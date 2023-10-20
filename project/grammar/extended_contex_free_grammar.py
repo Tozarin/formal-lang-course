@@ -101,6 +101,8 @@ def extended_contex_free_grammar_from_string(
             raise ExtendedContexFreeGrammarExepction("Missing -> in production")
 
         for token in tokens[2:]:
+            if token in ["epsilon", "endpoint"]:
+                continue
             token = filter(lambda char: char not in "[]()|+*?" ,token)
             for symbol in token:
                 terminals.add(symbol)
