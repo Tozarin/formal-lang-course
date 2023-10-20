@@ -4,7 +4,7 @@ from pyformlang.cfg import CFG, Variable
 
 
 def contex_free_to_weak_chomsky_form(
-    contex_free_grammar: str | CFG, start_nonterminal: str = "S"
+    contex_free_grammar: str | CFG, starting_nonterminal: str = "S"
 ) -> CFG:
 
     """
@@ -13,7 +13,7 @@ def contex_free_to_weak_chomsky_form(
 
     Args:
         contex_free_grammar: contex free grammar to be converted
-        start_nonterminal: starting nonterminal for new grammar
+        starting_nonterminal: starting nonterminal for new grammar
 
     Returns:
         Equivalent grammar that represented in weak Chomsky form
@@ -21,7 +21,7 @@ def contex_free_to_weak_chomsky_form(
 
     if not isinstance(contex_free_grammar, CFG):
         contex_free_grammar = CFG.from_text(
-            contex_free_grammar, Variable(start_nonterminal)
+            contex_free_grammar, Variable(starting_nonterminal)
         )
 
     contex_free_grammar = (
@@ -43,7 +43,7 @@ def contex_free_to_weak_chomsky_form(
 
 
 def read_contex_free_grammar_from_file(
-    path_to_grammar: Path, start_nonterminal: str = "S"
+    path_to_grammar: Path, starting_nonterminal: str = "S"
 ) -> CFG:
 
     """
@@ -51,7 +51,7 @@ def read_contex_free_grammar_from_file(
 
     Args:
         path_to_grammar: path to file that contained grammar
-        start_nonterminal: starting nonterminal for grammar
+        starting_nonterminal: starting nonterminal for grammar
 
     Returns:
         Readed grammar
@@ -60,4 +60,4 @@ def read_contex_free_grammar_from_file(
     with open(path_to_grammar, "r") as file:
         grammar = file.read()
 
-    return CFG.from_text(grammar, Variable(start_nonterminal))
+    return CFG.from_text(grammar, Variable(starting_nonterminal))
