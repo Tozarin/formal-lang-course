@@ -2,7 +2,7 @@ path_to_results = "tests/results/"
 path_to_automata = path_to_results + "automata/"
 path_to_graphs = path_to_results + "graphs/"
 path_to_bfs_test_graphs = path_to_graphs + "bfs_regular_request/"
-
+path_to_grammars = path_to_results + "grammars/"
 reg_test = [
     ("", "blanck_fin_automata.dot"),
     ("a", "a_fin_automata.dot"),
@@ -106,4 +106,62 @@ bfs_regular_request_test = [
     ("third.dot", "a*", {"1"}, {"1"}, set(), set()),
     ("fourth.dot", "a*", {"1"}, {"2", "3"}, {("1", "2"), ("1", "3")}, {"2", "3"}),
     ("fifth.dot", "a*c", {"1"}, {}, {("1", "3"), ("1", "4")}, {"3", "4"}),
+]
+
+contex_free_and_weak_chomsky_forms = [
+    ("", None, "", None),
+    ("S -> a", None, "", None),
+    ("S -> a", "S", "S -> a", "S"),
+    ("A -> a", "A", "A -> a", "A"),
+    ("S -> a", "B", "", "B"),
+    ("S -> A B\nA -> a\nB -> b", "S", "S -> A B\nA -> a\nB -> b", "S"),
+    ("S -> A S | ending\nA -> a", "S", "S -> A S | ending\nA -> a", "S"),
+    (
+        "S -> A B | ending\nA -> B S\nB -> b",
+        "S",
+        "S -> A B | ending\nA -> B S\nB -> b",
+        "S",
+    ),
+    ("S -> epsilon", "S", "S -> epsilon", "S"),
+    ("S -> A B\nA -> a\nB -> epsilon", "S", "S -> A B\nA -> a\nB -> epsilon", "S"),
+    (
+        "S -> A B C D E\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e",
+        "S",
+        "S -> A C#CNF#1\nC#CNF#1 -> B C#CNF#2\nC#CNF#2 -> C C#CNF#3\nC#CNF#3 -> D E\nA -> a\nB -> b\nC -> c\nD -> d\nE -> e",
+        "S",
+    ),
+    (
+        "S -> a b c d e",
+        "S",
+        'S -> "VAR:a#CNF#" C#CNF#1\nC#CNF#1 -> "VAR:b#CNF#" C#CNF#2\nC#CNF#2 -> "VAR:c#CNF#" C#CNF#3\nC#CNF#3 -> "VAR:d#CNF#" "VAR:e#CNF#"\na#CNF# -> a\nb#CNF# -> b\nc#CNF# -> c\nd#CNF# -> d\ne#CNF# -> e',
+        "S",
+    ),
+    (
+        "S -> a b c epsilon",
+        "S",
+        'S -> "VAR:a#CNF#" C#CNF#1\nC#CNF#1 -> "VAR:b#CNF#" "VAR:c#CNF#"\na#CNF# -> a\nb#CNF# -> b\nc#CNF# -> c',
+        "S",
+    ),
+    (
+        "S -> a B c\nB -> b",
+        "S",
+        'S -> "VAR:a#CNF#" C#CNF#1\nC#CNF#1 -> B "VAR:c#CNF#"\na#CNF# -> a\nB -> b\nc#CNF# -> c',
+        "S",
+    ),
+    ("S -> A\nA -> B\nB -> b", "S", "S -> b", "S"),
+    (
+        "S -> a B C | epsilon\nB -> E b\nE -> epsilon\nC -> B | c F\n F -> E",
+        "S",
+        'S -> "VAR:a#CNF#" C#CNF#1 | epsilon\nC#CNF#1 -> B C\nB -> E "VAR:b#CNF#"\nE -> epsilon\nC -> E "VAR:b#CNF#" | "VAR:c#CNF#" F\nF -> epsilon\na#CNF# -> a\nb#CNF# -> b\nc#CNF# -> c',
+        "S",
+    ),
+]
+
+names_of_grammar_files = [
+    ("first.grammar", "S", "S -> a", "S"),
+    ("second.grammar", "A", "A -> a", "A"),
+    ("third.grammar", "B", "S -> a", "B"),
+    ("fourth.grammar", "S", "S -> A B\nA -> a\nB -> b", "S"),
+    ("fifth.grammar", "S", "S -> A S | ending\nA -> a", "S"),
+    ("sixth.grammar", "S", "S -> epsilon", "S"),
 ]
