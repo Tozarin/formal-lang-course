@@ -71,7 +71,7 @@ def extend_contex_free_grammar(
     )
 
 
-def extend_contex_free_grammar_from_string(
+def extended_contex_free_grammar_from_string(
     extend_contex_free_grammar: str, starting_symbol: str
 ) -> ExtendedContexFreeGrammar:
 
@@ -118,7 +118,7 @@ def extend_contex_free_grammar_from_string(
     )
 
 
-def extend_contex_free_grammar_from_file(
+def extended_contex_free_grammar_from_file(
     path_to_file_with_grammar: Path, starting_symbol: str
 ) -> ExtendedContexFreeGrammar:
 
