@@ -22,6 +22,18 @@ def extend_contex_free_grammar(
     contex_free_grammar: CFG | str | Path, starting_nonterminal: str = None
 ) -> ExtendedContexFreeGrammar:
 
+    """
+    Converts contex free grammar to extended variant
+
+    Args:
+        gracontex_free_grammarph: contex free grammar represented
+        as CFG or string or path to file with grammar
+        starting_nonterminal: starting nonterminal to converted grammar
+
+    Returns:
+        Extended contex free grammar equivalent given one
+    """
+
     if isinstance(contex_free_grammar, str):
         contex_free_grammar = CFG.from_text(
             contex_free_grammar, Variable(starting_nonterminal)
@@ -63,6 +75,18 @@ def extend_contex_free_grammar_from_string(
     extend_contex_free_grammar: str, starting_symbol: str
 ) -> ExtendedContexFreeGrammar:
 
+    """
+    Builds extended contex free grammar from string representation
+
+    Args:
+        extend_contex_free_grammar: extended contex free grammar
+        reprsented as string
+        starting_symbol: starting nonterminal to builed grammar
+
+    Returns:
+        Extended contex free grammar as namedtuple
+    """
+
     string_productions = extend_contex_free_grammar.split("\n")
 
     productions: dict[Variable, Regex] = {}
@@ -97,6 +121,18 @@ def extend_contex_free_grammar_from_string(
 def extend_contex_free_grammar_from_file(
     path_to_file_with_grammar: Path, starting_symbol: str
 ) -> ExtendedContexFreeGrammar:
+
+    """
+    Reads extended contex free grammar from file
+
+    Args:
+        path_to_file_with_grammar: path to file with
+        extended contex free grammar
+        starting_symbol: starting nonterminal to readed grammar
+
+    Returns:
+        Extended contex free grammar as namedtuple
+    """
 
     with open(path_to_file_with_grammar, "r") as file:
         grammar = file.read()

@@ -17,6 +17,18 @@ def recursive_state_machine_from_extended_contex_free_grammar(
     starting_symbol: str,
 ) -> RecursiveStateMachine:
 
+    """
+    Builds recursive state machine from given extended contex free grammar
+
+    Args:
+        extended_contex_free_grammar: extended contex free grammar to
+        be sourse represented as namedtuple or string or path to file with grammar
+        starting_symbol: starting nonterminal to builded grammar
+
+    Returns:
+        Recursive state machine equivalent given grammar
+    """
+
     if isinstance(extended_contex_free_grammar, Path):
         extended_contex_free_grammar = extend_contex_free_grammar_from_file(
             extend_contex_free_grammar, starting_symbol
@@ -39,6 +51,17 @@ def recursive_state_machine_from_extended_contex_free_grammar(
 def minimize_recursive_state_machine(
     recursive_state_machine: RecursiveStateMachine,
 ) -> RecursiveStateMachine:
+
+    """
+    Minimizes given recursive state machine
+
+    Args:
+        recursive_state_machine: recursive state machine to
+        be minimized
+
+    Returns:
+        Minimize recursive state machine
+    """
 
     for nonterminal, subautomata in recursive_state_machine.subautomatons.items():
         recursive_state_machine.subautomatons[nonterminal] = subautomata.minimize()
