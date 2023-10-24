@@ -3,6 +3,8 @@ path_to_automata = path_to_results + "automata/"
 path_to_graphs = path_to_results + "graphs/"
 path_to_bfs_test_graphs = path_to_graphs + "bfs_regular_request/"
 
+matrix_types = ["lil", "dok", "csr", "csc"]
+
 reg_test = [
     ("", "blanck_fin_automata.dot"),
     ("a", "a_fin_automata.dot"),

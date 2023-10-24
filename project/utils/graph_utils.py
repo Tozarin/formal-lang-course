@@ -4,7 +4,16 @@ from typing import Set, Tuple
 from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
 from pyformlang.regular_expression import Regex
-from scipy.sparse import lil_array, lil_matrix
+from scipy.sparse import (
+    lil_array,
+    dok_array,
+    csr_array,
+    csc_array,
+    lil_matrix,
+    dok_matrix,
+    csr_matrix,
+    csc_matrix,
+)
 
 from project.utils.automata_utils import (
     gen_min_dfa_by_reg,
@@ -113,7 +122,11 @@ def save_as_dot(graph: MultiDiGraph, path: str):
 
 
 def regular_request(
-    graph: MultiDiGraph, starting_vertices: set, final_vertices: set, reg: Regex
+    graph: MultiDiGraph,
+    starting_vertices: set,
+    final_vertices: set,
+    reg: Regex,
+    matrix_type: str,
 ) -> set:
 
     """
@@ -124,23 +137,24 @@ def regular_request(
         starting_vertices: set of starting vertices
         final_vertices: set of finale vertices
         reg: regular expresiion that paths must satisfy
+        matrix_type: type of used matrix
 
     Returns:
         Set of pair of vertices that connected by satisfying path
     """
 
     binary_matrix_of_regular_request = build_binary_matrix_by_nfa(
-        gen_min_dfa_by_reg(reg)
+        gen_min_dfa_by_reg(reg), matrix_type
     )
     binary_matrix_of_graph = build_binary_matrix_by_nfa(
-        gen_nfa_by_graph(graph, starting_vertices, final_vertices)
+        gen_nfa_by_graph(graph, starting_vertices, final_vertices), matrix_type
     )
 
     intersect = intersect_of_automata_by_binary_matixes(
-        binary_matrix_of_graph, binary_matrix_of_regular_request
+        binary_matrix_of_graph, binary_matrix_of_regular_request, matrix_type
     )
 
-    tran_closure = transitive_closure(intersect)
+    tran_closure = transitive_closure(intersect, matrix_type)
 
     result = set()
     indexes = {i: st for st, i in binary_matrix_of_graph.indexes.items()}
@@ -164,6 +178,7 @@ def regular_request(
 def bfs_regular_request(
     graph: MultiDiGraph,
     reg: Regex,
+    matrix_type: str,
     starting_vertices: set = None,
     final_vertices: set = None,
     separated_flag: bool = False,
@@ -176,6 +191,7 @@ def bfs_regular_request(
     Args:
         graph: graph to find paths
         reg: regular expresiion that paths must satisfy
+        matrix_type: type of used matrix
         starting_vertices: set of starting vertices
         final_vertices: set of finale vertices
         separeted_flag: flag that represented what kind of result is required
@@ -185,9 +201,11 @@ def bfs_regular_request(
     """
 
     binary_matrix_of_graph = build_binary_matrix_by_nfa(
-        gen_nfa_by_graph(graph, starting_vertices, final_vertices)
+        gen_nfa_by_graph(graph, starting_vertices, final_vertices), matrix_type
     )
-    binary_matrix_of_request = build_binary_matrix_by_nfa(gen_min_dfa_by_reg(reg))
+    binary_matrix_of_request = build_binary_matrix_by_nfa(
+        gen_min_dfa_by_reg(reg), matrix_type
+    )
 
     size_of_graph = len(binary_matrix_of_graph.indexes)
     size_of_request = len(binary_matrix_of_request.indexes)
@@ -196,7 +214,7 @@ def bfs_regular_request(
         return set()
 
     direct_sum_of_matrixes = direct_sum(
-        binary_matrix_of_request, binary_matrix_of_graph
+        binary_matrix_of_request, binary_matrix_of_graph, matrix_type
     )
     indexes_of_graph_starting_states = []
 
@@ -208,31 +226,54 @@ def bfs_regular_request(
             binary_matrix_of_request.starting_states,
             binary_matrix_of_graph.indexes,
             binary_matrix_of_graph.starting_states,
+            matrix_type,
         )
     else:
+
+        starting_row = [
+            [
+                int(state in binary_matrix_of_graph.starting_states)
+                for state in binary_matrix_of_graph.indexes.keys()
+            ]
+        ]
+
+        match matrix_type:
+            case "lil":
+                starting_row_as_array = lil_array(starting_row)
+            case "dok":
+                starting_row_as_array = dok_array(starting_row)
+            case "csr":
+                starting_row_as_array = csr_array(starting_row)
+            case "csc":
+                starting_row_as_array = csc_array(starting_row)
+
         front = init_front(
             size_of_request,
             size_of_request + size_of_graph,
             binary_matrix_of_request.indexes,
             binary_matrix_of_request.starting_states,
-            lil_array(
-                [
-                    [
-                        int(state in binary_matrix_of_graph.starting_states)
-                        for state in binary_matrix_of_graph.indexes.keys()
-                    ]
-                ]
-            ),
+            starting_row_as_array,
+            matrix_type,
         )
 
-    visited_states = lil_matrix(front.shape)
+    match matrix_type:
+        case "lil":
+            visited_states = lil_matrix(front.shape)
+        case "dok":
+            visited_states = dok_matrix(front.shape)
+        case "csr":
+            visited_states = csr_matrix(front.shape)
+        case "csc":
+            visited_states = csc_matrix(front.shape)
 
     while True:
         tmp_visited_states = visited_states.copy()
 
         for matrix in direct_sum_of_matrixes.values():
             new_front = visited_states @ matrix if front is None else front @ matrix
-            visited_states += sort_left_part_of_front(size_of_request, new_front)
+            visited_states += sort_left_part_of_front(
+                size_of_request, new_front, matrix_type
+            )
 
         front = None
 
