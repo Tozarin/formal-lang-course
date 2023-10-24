@@ -22,6 +22,7 @@ from common_info import (
     path_to_bfs_test_graphs,
     regular_request_test,
     bfs_regular_request_test,
+    matrix_types,
 )
 
 sample_info = get_info("skos")
@@ -111,7 +112,8 @@ def test_regular_request_at_empty_graph():
 
     graph = MultiDiGraph()
     for _, _, _, regex, _, _, _ in regular_request_test:
-        assert regular_request(graph, {}, {}, Regex(regex)) == set()
+        for matrix_type in matrix_types:
+            assert regular_request(graph, {}, {}, Regex(regex), matrix_type) == set()
 
 
 def test_regular_request_at_two_cycles_graph():
@@ -126,10 +128,12 @@ def test_regular_request_at_two_cycles_graph():
         expected_set,
     ) in regular_request_test:
         graph = gen_labeled_two_cycles_graph(fst_num_nodes, snd_num_nodes, marks)
-        assert (
-            regular_request(graph, starting_states, final_states, Regex(regex))
-            == expected_set
-        )
+
+        for matrix_type in matrix_types:
+            assert (
+                regular_request(graph, starting_states, final_states, Regex(regex), matrix_type)
+                == expected_set
+            )
 
 
 def test_bfs_regular_request_at_empty_graph():
@@ -137,10 +141,11 @@ def test_bfs_regular_request_at_empty_graph():
     graph = MultiDiGraph()
     for _, regex, _, _, _, _ in bfs_regular_request_test:
         for separeted_flag in [True, False]:
-            assert (
-                bfs_regular_request(graph, Regex(regex), {}, {}, separeted_flag)
-                == set()
-            )
+            for matrix_type in matrix_types:
+                assert (
+                    bfs_regular_request(graph, Regex(regex), matrix_type, {}, {}, separeted_flag)
+                    == set()
+                )
 
 
 def test_bfs_regular_separated_request_at_graph():
@@ -154,12 +159,14 @@ def test_bfs_regular_separated_request_at_graph():
         _,
     ) in bfs_regular_request_test:
         graph = load_from_dot(path_to_bfs_test_graphs + graph_name)
-        assert (
-            bfs_regular_request(
-                graph, Regex(regex), starting_states, final_states, True
+
+        for matrix_type in matrix_types:
+            assert (
+                bfs_regular_request(
+                    graph, Regex(regex), matrix_type, starting_states, final_states, True
+                )
+                == separated_variant_expected_set
             )
-            == separated_variant_expected_set
-        )
 
 
 def test_bfs_regular_non_separated_request_at_graph():
@@ -172,7 +179,9 @@ def test_bfs_regular_non_separated_request_at_graph():
         non_separated_variant_expected_set,
     ) in bfs_regular_request_test:
         graph = load_from_dot(path_to_bfs_test_graphs + graph_name)
-        assert (
-            bfs_regular_request(graph, Regex(regex), starting_states, final_states)
-            == non_separated_variant_expected_set
-        )
+
+        for matrix_type in matrix_types:
+            assert (
+                bfs_regular_request(graph, Regex(regex), matrix_type, starting_states, final_states)
+                == non_separated_variant_expected_set
+            )

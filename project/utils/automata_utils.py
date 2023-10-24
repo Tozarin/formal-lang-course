@@ -85,6 +85,7 @@ def gen_nfa_by_graph(
 def intersect_of_automata(
     left_nfa: NondeterministicFiniteAutomaton,
     right_nfa: NondeterministicFiniteAutomaton,
+    matrix_type: str
 ) -> NondeterministicFiniteAutomaton:
 
     """
@@ -93,17 +94,18 @@ def intersect_of_automata(
     Args:
         left_nfa: left side automaton
         right_nfa: right side automaton
+        matrix_type: type of used matrix
 
     Returns:
         Intersect of automata
     """
 
     left_bin_matrix, right_bin_matrix = build_binary_matrix_by_nfa(
-        left_nfa
-    ), build_binary_matrix_by_nfa(right_nfa)
+        left_nfa, matrix_type
+    ), build_binary_matrix_by_nfa(right_nfa, matrix_type)
 
     rez_bin_matrix = intersect_of_automata_by_binary_matixes(
-        left_bin_matrix, right_bin_matrix
+        left_bin_matrix, right_bin_matrix, matrix_type
     )
 
     return build_nfa_by_binary_matrix(rez_bin_matrix)
