@@ -41,7 +41,9 @@ def test_build_empty():
 
     for matrix_type in matrix_types:
         nfa = NondeterministicFiniteAutomaton()
-        assert build_nfa_by_binary_matrix(build_binary_matrix_by_nfa(nfa, matrix_type)).is_empty()
+        assert build_nfa_by_binary_matrix(
+            build_binary_matrix_by_nfa(nfa, matrix_type)
+        ).is_empty()
 
 
 def test_build_from_and_to_bm():
@@ -73,7 +75,9 @@ def test_intersect_with_empty_automaton():
         non_empty_automaton = build_nfa(transitions_list, starting_states, final_states)
 
         for matrix_type in matrix_types:
-            intersect = intersect_of_automata(empty_automaton, non_empty_automaton, matrix_type)
+            intersect = intersect_of_automata(
+                empty_automaton, non_empty_automaton, matrix_type
+            )
 
             assert intersect.is_empty()
 
@@ -90,7 +94,9 @@ def test_intersect_of_automata():
             expected_automaton = left_automaton.get_intersection(right_automaton)
 
             for matrix_type in matrix_types:
-                builded_automaton = intersect_of_automata(left_automaton, right_automaton, matrix_type)
+                builded_automaton = intersect_of_automata(
+                    left_automaton, right_automaton, matrix_type
+                )
 
                 assert expected_automaton.is_equivalent_to(builded_automaton)
 

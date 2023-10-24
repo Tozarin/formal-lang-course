@@ -4,7 +4,16 @@ from typing import Set, Tuple
 from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
 from pyformlang.regular_expression import Regex
-from scipy.sparse import lil_array, dok_array, csr_array, csc_array, lil_matrix, dok_matrix, csr_matrix, csc_matrix
+from scipy.sparse import (
+    lil_array,
+    dok_array,
+    csr_array,
+    csc_array,
+    lil_matrix,
+    dok_matrix,
+    csr_matrix,
+    csc_matrix,
+)
 
 from project.utils.automata_utils import (
     gen_min_dfa_by_reg,
@@ -113,7 +122,11 @@ def save_as_dot(graph: MultiDiGraph, path: str):
 
 
 def regular_request(
-    graph: MultiDiGraph, starting_vertices: set, final_vertices: set, reg: Regex, matrix_type: str
+    graph: MultiDiGraph,
+    starting_vertices: set,
+    final_vertices: set,
+    reg: Regex,
+    matrix_type: str,
 ) -> set:
 
     """
@@ -190,7 +203,9 @@ def bfs_regular_request(
     binary_matrix_of_graph = build_binary_matrix_by_nfa(
         gen_nfa_by_graph(graph, starting_vertices, final_vertices), matrix_type
     )
-    binary_matrix_of_request = build_binary_matrix_by_nfa(gen_min_dfa_by_reg(reg), matrix_type)
+    binary_matrix_of_request = build_binary_matrix_by_nfa(
+        gen_min_dfa_by_reg(reg), matrix_type
+    )
 
     size_of_graph = len(binary_matrix_of_graph.indexes)
     size_of_request = len(binary_matrix_of_request.indexes)
@@ -211,11 +226,16 @@ def bfs_regular_request(
             binary_matrix_of_request.starting_states,
             binary_matrix_of_graph.indexes,
             binary_matrix_of_graph.starting_states,
-            matrix_type
+            matrix_type,
         )
     else:
 
-        starting_row = [[int(state in binary_matrix_of_graph.starting_states) for state in binary_matrix_of_graph.indexes.keys()]]
+        starting_row = [
+            [
+                int(state in binary_matrix_of_graph.starting_states)
+                for state in binary_matrix_of_graph.indexes.keys()
+            ]
+        ]
 
         match matrix_type:
             case "lil":
@@ -233,7 +253,7 @@ def bfs_regular_request(
             binary_matrix_of_request.indexes,
             binary_matrix_of_request.starting_states,
             starting_row_as_array,
-            matrix_type
+            matrix_type,
         )
 
     match matrix_type:
@@ -251,7 +271,9 @@ def bfs_regular_request(
 
         for matrix in direct_sum_of_matrixes.values():
             new_front = visited_states @ matrix if front is None else front @ matrix
-            visited_states += sort_left_part_of_front(size_of_request, new_front, matrix_type)
+            visited_states += sort_left_part_of_front(
+                size_of_request, new_front, matrix_type
+            )
 
         front = None
 

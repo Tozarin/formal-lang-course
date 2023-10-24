@@ -6,7 +6,8 @@ from scipy.sparse import (
     kron,
     block_diag,
     lil_matrix,
-    csc_matrix, csr_matrix,
+    csc_matrix,
+    csr_matrix,
     csr_array,
     lil_array,
     csc_array,
@@ -19,7 +20,9 @@ BinaryMatrix = namedtuple(
 )
 
 
-def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton, matrix_type: str) -> BinaryMatrix:
+def build_binary_matrix_by_nfa(
+    nfa: NondeterministicFiniteAutomaton, matrix_type: str
+) -> BinaryMatrix:
 
     """
     Builds decomposition of binary matrix by given nondeterministic automaton
@@ -152,7 +155,7 @@ def transitive_closure(bin_matrix: BinaryMatrix, matrix_type: str) -> lil_matrix
 
 
 def intersect_of_automata_by_binary_matixes(
-    left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix, matrix_type : str
+    left_bin_matrix: BinaryMatrix, right_bin_matrix: BinaryMatrix, matrix_type: str
 ) -> BinaryMatrix:
 
     """
@@ -234,16 +237,60 @@ def direct_sum(
             matrix_to_used = csc_matrix((size_of_right_matrix, size_of_right_matrix))
 
     for mark in left_bin_matrix.matrix.keys():
-        
+
         match matrix_type:
             case "lil":
-                result_matrix[mark] = lil_array( block_diag((left_bin_matrix.matrix[mark], (matrix_to_used if mark not in right_bin_matrix.matrix.keys() else right_bin_matrix.matrix[mark]))))
+                result_matrix[mark] = lil_array(
+                    block_diag(
+                        (
+                            left_bin_matrix.matrix[mark],
+                            (
+                                matrix_to_used
+                                if mark not in right_bin_matrix.matrix.keys()
+                                else right_bin_matrix.matrix[mark]
+                            ),
+                        )
+                    )
+                )
             case "dok":
-                result_matrix[mark] = dok_array( block_diag((left_bin_matrix.matrix[mark], (matrix_to_used if mark not in right_bin_matrix.matrix.keys() else right_bin_matrix.matrix[mark]))))
+                result_matrix[mark] = dok_array(
+                    block_diag(
+                        (
+                            left_bin_matrix.matrix[mark],
+                            (
+                                matrix_to_used
+                                if mark not in right_bin_matrix.matrix.keys()
+                                else right_bin_matrix.matrix[mark]
+                            ),
+                        )
+                    )
+                )
             case "csr":
-                result_matrix[mark] = csr_array( block_diag((left_bin_matrix.matrix[mark], (matrix_to_used if mark not in right_bin_matrix.matrix.keys() else right_bin_matrix.matrix[mark]))))
+                result_matrix[mark] = csr_array(
+                    block_diag(
+                        (
+                            left_bin_matrix.matrix[mark],
+                            (
+                                matrix_to_used
+                                if mark not in right_bin_matrix.matrix.keys()
+                                else right_bin_matrix.matrix[mark]
+                            ),
+                        )
+                    )
+                )
             case "csc":
-                result_matrix[mark] = csc_array( block_diag((left_bin_matrix.matrix[mark], (matrix_to_used if mark not in right_bin_matrix.matrix.keys() else right_bin_matrix.matrix[mark]))))
+                result_matrix[mark] = csc_array(
+                    block_diag(
+                        (
+                            left_bin_matrix.matrix[mark],
+                            (
+                                matrix_to_used
+                                if mark not in right_bin_matrix.matrix.keys()
+                                else right_bin_matrix.matrix[mark]
+                            ),
+                        )
+                    )
+                )
 
     return result_matrix
 
@@ -322,7 +369,9 @@ def init_separeted_front(
     for starting_state in starting_states:
         list_of_starting_states.append(starting_state)
 
-        starting_row = [[int(starting_state == state) for state in graph_indexes.keys()]]
+        starting_row = [
+            [int(starting_state == state) for state in graph_indexes.keys()]
+        ]
 
         match matrix_type:
             case "lil":
@@ -347,23 +396,38 @@ def init_separeted_front(
 
     match matrix_type:
         case "lil":
-            returned_value = (lil_array(vstack(fronts)) if len(fronts) > 0 else lil_array((width, hight)), list_of_starting_states)
+            returned_value = (
+                lil_array(vstack(fronts))
+                if len(fronts) > 0
+                else lil_array((width, hight)),
+                list_of_starting_states,
+            )
         case "dok":
-            returned_value = (dok_array(vstack(fronts)) if len(fronts) > 0 else dok_array((width, hight)), list_of_starting_states)
+            returned_value = (
+                dok_array(vstack(fronts))
+                if len(fronts) > 0
+                else dok_array((width, hight)),
+                list_of_starting_states,
+            )
         case "csr":
-            returned_value = (csr_array(vstack(fronts)) if len(fronts) > 0 else csr_array((width, hight)), list_of_starting_states)
+            returned_value = (
+                csr_array(vstack(fronts))
+                if len(fronts) > 0
+                else csr_array((width, hight)),
+                list_of_starting_states,
+            )
         case "csc":
-            returned_value = (csc_array(vstack(fronts)) if len(fronts) > 0 else csc_array((width, hight)), list_of_starting_states)
+            returned_value = (
+                csc_array(vstack(fronts))
+                if len(fronts) > 0
+                else csc_array((width, hight)),
+                list_of_starting_states,
+            )
 
     return returned_value
-        
 
 
-def sort_left_part_of_front(
-    size_of_left_part: int,
-    front: csr_array,
-    matrix_type: str
-):
+def sort_left_part_of_front(size_of_left_part: int, front: csr_array, matrix_type: str):
 
     """
     Transport rows for each left part of front to get single matrixes

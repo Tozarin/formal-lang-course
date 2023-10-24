@@ -85,7 +85,7 @@ def gen_nfa_by_graph(
 def intersect_of_automata(
     left_nfa: NondeterministicFiniteAutomaton,
     right_nfa: NondeterministicFiniteAutomaton,
-    matrix_type: str
+    matrix_type: str,
 ) -> NondeterministicFiniteAutomaton:
 
     """

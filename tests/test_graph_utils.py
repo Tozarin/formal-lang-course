@@ -131,7 +131,9 @@ def test_regular_request_at_two_cycles_graph():
 
         for matrix_type in matrix_types:
             assert (
-                regular_request(graph, starting_states, final_states, Regex(regex), matrix_type)
+                regular_request(
+                    graph, starting_states, final_states, Regex(regex), matrix_type
+                )
                 == expected_set
             )
 
@@ -143,7 +145,9 @@ def test_bfs_regular_request_at_empty_graph():
         for separeted_flag in [True, False]:
             for matrix_type in matrix_types:
                 assert (
-                    bfs_regular_request(graph, Regex(regex), matrix_type, {}, {}, separeted_flag)
+                    bfs_regular_request(
+                        graph, Regex(regex), matrix_type, {}, {}, separeted_flag
+                    )
                     == set()
                 )
 
@@ -163,7 +167,12 @@ def test_bfs_regular_separated_request_at_graph():
         for matrix_type in matrix_types:
             assert (
                 bfs_regular_request(
-                    graph, Regex(regex), matrix_type, starting_states, final_states, True
+                    graph,
+                    Regex(regex),
+                    matrix_type,
+                    starting_states,
+                    final_states,
+                    True,
                 )
                 == separated_variant_expected_set
             )
@@ -182,6 +191,8 @@ def test_bfs_regular_non_separated_request_at_graph():
 
         for matrix_type in matrix_types:
             assert (
-                bfs_regular_request(graph, Regex(regex), matrix_type, starting_states, final_states)
+                bfs_regular_request(
+                    graph, Regex(regex), matrix_type, starting_states, final_states
+                )
                 == non_separated_variant_expected_set
             )
