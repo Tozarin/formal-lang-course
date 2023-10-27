@@ -2,7 +2,7 @@ import pytest
 
 from pyformlang.cfg import Variable
 
-from project.grammar.helling_request import (
+from project.grammar.cfpq import (
     constrained_transitive_closure,
     helling_request,
 )
