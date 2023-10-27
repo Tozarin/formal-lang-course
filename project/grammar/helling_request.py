@@ -1,4 +1,4 @@
-from pyformlang.cfg import CFG, Variable, Terminal, Epsilone
+from pyformlang.cfg import CFG, Variable, Terminal, Epsilon
 from networkx import Graph
 
 from project.utils.grammar_utils import contex_free_to_weak_chomsky_form
@@ -109,7 +109,7 @@ def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
                     if (first_variable, second_variable) in variable_productions[
                         variable
                     ] and (first_start, variable, second_end) not in result:
-                            queue.add((first_start, variable, second_end))
+                        queue.add((first_start, variable, second_end))
                         tmp.add((first_start, variable, second_end))
 
         result |= tmp
