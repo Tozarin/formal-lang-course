@@ -205,13 +205,13 @@ def matrix_constrained_transitive_closure(
         Transitive closure of graph
     """
 
-    contex_free_grammar = contex_free_to_weak_chomsky_form(contex_free_grammar)
+    weak_form_of_grammar = contex_free_to_weak_chomsky_form(contex_free_grammar)
 
     epsilon_productions = set()
     terminal_productions = {}
     variable_productions = set()
 
-    for production in contex_free_grammar.productions:
+    for production in weak_form_of_grammar.productions:
         match production.body:
             case [Epsilon()]:
                 epsilon_productions.add(production.head)
@@ -227,7 +227,7 @@ def matrix_constrained_transitive_closure(
     nodes_indexes = {node: index for index, node in enumerate(graph.nodes)}
     matrixes: dict[Variable, dok_array] = {
         variable: dok_array((len(nodes_indexes), len(nodes_indexes)), dtype=bool)
-        for variable in contex_free_grammar.variables
+        for variable in weak_form_of_grammar.variables
     }
 
     for node_from, node_to, label in graph.edges.data("label"):
