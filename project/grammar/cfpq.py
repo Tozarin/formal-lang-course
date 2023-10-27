@@ -33,10 +33,10 @@ def helling_request(
     return cfpq_request_with_custom_transitive_closure(
         graph,
         request,
+        helling_constrained_transitive_closure,
         starting_vertices,
         final_vertices,
         starting_symbol,
-        helling_constrained_transitive_closure,
     )
 
 
@@ -66,10 +66,10 @@ def matrix_request(
     return cfpq_request_with_custom_transitive_closure(
         graph,
         request,
+        matrix_constrained_transitive_closure,
         starting_vertices,
         final_vertices,
         starting_symbol,
-        matrix_constrained_transitive_closure,
     )
 
 
@@ -205,33 +205,35 @@ def matrix_constrained_transitive_closure(
         Transitive closure of graph
     """
 
-    weak_form_of_grammar = contex_free_to_weak_chomsky_form(contex_free_grammar)
+    contex_free_grammar = contex_free_to_weak_chomsky_form(contex_free_grammar)
 
-    epsilon_productions: set[Variable] = set()
-    terminal_productions: dict[Variable, set[Terminal]] = {}
-    variable_productions: dict[Variable, set[tuple[Variable, Variable]]] = {}
+    epsilon_productions = set()
+    terminal_productions = {}
+    variable_productions = set()
 
-    for production in weak_form_of_grammar.productions:
+    for production in contex_free_grammar.productions:
         match production.body:
             case [Epsilon()]:
                 epsilon_productions.add(production.head)
             case [Terminal() as terminal]:
-                terminal_productions.setdefault(production.head, set()).add(terminal)
+                terminal_productions.setdefault(terminal.value, set()).add(
+                    production.head
+                )
             case [Variable() as first_variable, Variable() as second_variable]:
-                variable_productions.setdefault(production.head, set()).add(
-                    (first_variable, second_variable)
+                variable_productions.add(
+                    (production.head, first_variable, second_variable)
                 )
 
     nodes_indexes = {node: index for index, node in enumerate(graph.nodes)}
     matrixes: dict[Variable, dok_array] = {
         variable: dok_array((len(nodes_indexes), len(nodes_indexes)), dtype=bool)
-        for variable in weak_form_of_grammar.variables
+        for variable in contex_free_grammar.variables
     }
 
-    for first_node, second_node, label in graph.edges.data("label"):
-        index_from = nodes_indexes[first_node]
-        index_to = nodes_indexes[second_node]
-        for variable in terminal_productions.setdefault(1, set()):
+    for node_from, node_to, label in graph.edges.data("label"):
+        index_from = nodes_indexes[node_from]
+        index_to = nodes_indexes[node_to]
+        for variable in terminal_productions.setdefault(label, set()):
             matrixes[variable][index_from, index_to] = True
 
     for matrix in matrixes.values():
@@ -241,18 +243,18 @@ def matrix_constrained_transitive_closure(
     for variable in epsilon_productions:
         matrixes[variable] += diagonal
 
-    changed = True
-    while changed:
-        changed = False
+    changed_flag = True
+    while changed_flag:
+        changed_flag = False
         for head, first_body, second_body in variable_productions:
-            old_nnz = matrixes[head].nnz
+            nnz_old = matrixes[head].nnz
             matrixes[head] += matrixes[first_body] @ matrixes[second_body]
-            changed |= matrixes[head].nnz != old_nnz
+            changed_flag |= matrixes[head].nnz != nnz_old
 
     reversed_nodes_indexes = {index: node for node, index in nodes_indexes.items()}
     result = set()
     for variable, matrix in matrixes.items():
-        for index_from, index_to in zip(*matrix.nonezero()):
+        for index_from, index_to in zip(*matrix.nonzero()):
             result.add(
                 (
                     reversed_nodes_indexes[index_from],
