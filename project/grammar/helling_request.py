@@ -36,11 +36,11 @@ def helling_request(
     if starting_symbol is None:
         starting_symbol = request.start_symbol
 
-    constrained_transitive_closure = constrained_transitive_closure(graph, request)
+    transitive_closure = constrained_transitive_closure(graph, request)
 
     return {
         (start_node, end_node)
-        for start_node, variable, end_node in constrained_transitive_closure
+        for start_node, variable, end_node in transitive_closure
         if start_node in starting_vertices
         and variable == starting_symbol
         and end_node in final_vertices
