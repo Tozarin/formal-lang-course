@@ -74,7 +74,7 @@ def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
                 terminal_productions.setdefault(production.head, set()).add(terminal)
             case [Variable() as first_variable, Variable() as second_variable]:
                 variable_productions.setdefault(production.head, set()).add(
-                    first_variable, second_variable
+                    (first_variable, second_variable)
                 )
 
     result = {
