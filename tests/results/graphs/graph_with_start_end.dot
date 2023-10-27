@@ -1,0 +1,5 @@
+digraph {
+1 [is_start=True, is_final=False];
+2 [is_start=False, is_final=True];
+1 -> 2 [label=a];
+}
