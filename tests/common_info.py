@@ -176,3 +176,64 @@ extended_grammars = [
     ("S -> endpoint", ["S"], [], {"S": ""}),
     ("S -> [a b]", ["S"], ["a", "b"], {"S": "[a b]"}),
 ]
+
+constrained_transitive_closure_examples = [
+    ("empty_graph.dot", "blank.grammar", set()),
+    ("empty_graph.dot", "first.grammar", set()),
+    ("graph_with_start_end.dot", "first.grammar", {("1", "S", "2")}),
+    ("simple_graph.dot", "first.grammar", {("1", "S", "2")}),
+    (
+        "not_simple_graph.dot",
+        "seventh.grammar",
+        {
+            ("0", "A", "1"),
+            ("1", "A", "2"),
+            ("2", "A", "0"),
+            ("2", "B", "3"),
+            ("3", "B", "2"),
+            ("1", "S", "3"),
+            ("1", "S1", "2"),
+            ("0", "S", "2"),
+            ("0", "S1", "3"),
+            ("2", "S", "3"),
+            ("2", "S1", "2"),
+            ("1", "S", "2"),
+            ("1", "S1", "3"),
+            ("0", "S", "3"),
+            ("0", "S1", "2"),
+            ("2", "S", "2"),
+            ("2", "S1", "3"),
+        },
+    ),
+]
+
+helling_examples = [
+    ("empty_graph.dot", set(), set(), None, "blank.grammar", set()),
+    ("empty_graph.dot", set(), set(), None, "first.grammar", set()),
+    ("empty_graph.dot", None, None, None, "first.grammar", set()),
+    ("graph_without_start_end.dot", None, None, "S", "first.grammar", {("1", "2")}),
+    (
+        "extended_simple_graph.dot",
+        None,
+        None,
+        "S",
+        "eighth.grammar",
+        {
+            ("1", "2"),
+            ("2", "3"),
+            ("1", "3"),
+            ("0", "2"),
+            ("0", "3"),
+            ("2", "2"),
+            ("1", "2"),
+        },
+    ),
+    (
+        "extended_simple_graph.dot",
+        {"0", "1", "3"},
+        {"3"},
+        "S",
+        "eighth.grammar",
+        {("1", "3"), ("0", "3")},
+    ),
+]
