@@ -61,7 +61,7 @@ def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
     """
 
     weak_form_of_grammar = contex_free_to_weak_chomsky_form(
-        contex_free_to_weak_chomsky_form
+        contex_free_grammar
     )
 
     epsilon_productions: set[Variable] = set()
