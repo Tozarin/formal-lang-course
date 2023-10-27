@@ -70,7 +70,7 @@ def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
 
     for production in weak_form_of_grammar.productions:
         match production.body:
-            case [Epsilone()]:
+            case [Epsilon()]:
                 epsilon_productions.add(production.head)
             case [Terminal as terminal]:
                 terminal_productions.setdefault(production.head, set()).add(terminal)
