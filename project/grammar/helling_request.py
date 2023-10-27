@@ -1,4 +1,4 @@
-from pyformlang.cfg import CFG, Variable, Terminal, Epsilon
+from pyformlang.cfg import Variable, Terminal, Epsilon, CFG
 from networkx import Graph
 
 from project.utils.grammar_utils import contex_free_to_weak_chomsky_form
@@ -60,9 +60,7 @@ def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
         Transitive closure of graph
     """
 
-    weak_form_of_grammar = contex_free_to_weak_chomsky_form(
-        contex_free_grammar
-    )
+    weak_form_of_grammar = contex_free_to_weak_chomsky_form(contex_free_grammar)
 
     epsilon_productions: set[Variable] = set()
     terminal_productions: dict[Variable, set[Terminal]] = {}
@@ -72,7 +70,7 @@ def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
         match production.body:
             case [Epsilon()]:
                 epsilon_productions.add(production.head)
-            case [Terminal as terminal]:
+            case [Terminal() as terminal]:
                 terminal_productions.setdefault(production.head, set()).add(terminal)
             case [Variable() as first_variable, Variable() as second_variable]:
                 variable_productions.setdefault(production.head, set()).add(
