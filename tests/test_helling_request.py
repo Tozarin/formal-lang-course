@@ -34,7 +34,8 @@ def test_helling_constrained_transitive_closure():
         }
 
         assert (
-            helling_constrained_transitive_closure(test_graph, test_grammar) == expected_answer
+            helling_constrained_transitive_closure(test_graph, test_grammar)
+            == expected_answer
         )
 
 
