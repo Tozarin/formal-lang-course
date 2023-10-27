@@ -3,7 +3,7 @@ import pytest
 from pyformlang.cfg import Variable
 
 from project.grammar.cfpq import (
-    constrained_transitive_closure,
+    helling_constrained_transitive_closure,
     helling_request,
 )
 from project.utils.graph_utils import load_from_dot
@@ -16,7 +16,7 @@ from common_info import (
 )
 
 
-def test_constrained_transitive_closure():
+def test_helling_constrained_transitive_closure():
 
     for (
         test_graph_name,
@@ -34,7 +34,7 @@ def test_constrained_transitive_closure():
         }
 
         assert (
-            constrained_transitive_closure(test_graph, test_grammar) == expected_answer
+            helling_constrained_transitive_closure(test_graph, test_grammar) == expected_answer
         )
 
 

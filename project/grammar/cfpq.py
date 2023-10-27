@@ -36,7 +36,7 @@ def helling_request(
     if starting_symbol is None:
         starting_symbol = request.start_symbol
 
-    transitive_closure = constrained_transitive_closure(graph, request)
+    transitive_closure = helling_constrained_transitive_closure(graph, request)
 
     return {
         (start_node, end_node)
@@ -47,7 +47,7 @@ def helling_request(
     }
 
 
-def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> set:
+def helling_constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> set:
 
     """
     Calculates transitive closure of graph with constrained by given grammar
