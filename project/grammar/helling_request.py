@@ -12,6 +12,21 @@ def helling_request(
     starting_symbol: str | Variable = "S",
 ) -> set:
 
+    """
+    From given starting and finale vertices finds pairs that are connected by path
+    satisfying contex free grammar in given graph
+
+    Args:
+        graph: graph to find paths
+        request: contex grammar that represent request
+        starting_vertices: set of starting vertices
+        final_vertices: set of finale vertices
+        starting_symbol: starting nonterminal to grammar
+
+    Returns:
+        Set of pair of vertices that connected by satisfying path
+    """
+
     if not isinstance(starting_symbol, Variable):
         starting_symbol = Variable(starting_symbol)
     if starting_vertices is None:
@@ -21,18 +36,29 @@ def helling_request(
     if starting_symbol is None:
         starting_symbol = request.start_symbol
 
-    constarined_transitive_closure = constarined_transitive_closure(graph, request)
+    constrained_transitive_closure = constrained_transitive_closure(graph, request)
 
     return {
         (start_node, end_node)
-        for start_node, variable, end_node in constarined_transitive_closure
+        for start_node, variable, end_node in constrained_transitive_closure
         if start_node in starting_vertices
         and variable == starting_symbol
         and end_node in final_vertices
     }
 
 
-def constarined_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> set:
+def constrained_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> set:
+
+    """
+    Calculates transitive closure of graph with constrained by given grammar
+
+    Args:
+        graph: graph with necessary information
+        contex_free_grammar: contex free grammar that represent constrains
+
+    Returns:
+        Transitive closure of graph
+    """
 
     weak_form_of_grammar = contex_free_to_weak_chomsky_form(
         contex_free_to_weak_chomsky_form
@@ -83,7 +109,7 @@ def constarined_transitive_closure(graph: Graph, contex_free_grammar: CFG) -> se
                     if (first_variable, second_variable) in variable_productions[
                         variable
                     ] and (first_start, variable, second_end) not in result:
-                        queue.add((first_start, variable, second_end))
+                            queue.add((first_start, variable, second_end))
                         tmp.add((first_start, variable, second_end))
 
         result |= tmp
