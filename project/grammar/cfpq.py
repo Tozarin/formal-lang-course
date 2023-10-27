@@ -17,7 +17,7 @@ def helling_request(
 
     """
     From given starting and finale vertices finds pairs that are connected by path
-    satisfying contex free grammar in given graph
+    satisfying contex free grammar in given graph by Helling's algorithm
 
     Args:
         graph: graph to find paths
@@ -48,6 +48,21 @@ def matrix_request(
     starting_symbol: str | Variable = "S",
 ) -> set:
 
+    """
+    From given starting and finale vertices finds pairs that are connected by path
+    satisfying contex free grammar in given graph by matrix algorithm
+
+    Args:
+        graph: graph to find paths
+        request: contex grammar that represent request
+        starting_vertices: set of starting vertices
+        final_vertices: set of finale vertices
+        starting_symbol: starting nonterminal to grammar
+
+    Returns:
+        Set of pair of vertices that connected by satisfying path
+    """
+
     return cfpq_request_with_custom_transitive_closure(
         graph,
         request,
@@ -66,6 +81,22 @@ def cfpq_request_with_custom_transitive_closure(
     final_vertices: set = None,
     starting_symbol: str | Variable = "S",
 ) -> set:
+
+    """
+    Support function that represents given arguments in from to be
+    returned as request answer
+
+    Args:
+        graph: graph to find paths
+        request: contex grammar that represent request
+        transitive_closure_function: function to transitive closure
+        starting_vertices: set of starting vertices
+        final_vertices: set of finale vertices
+        starting_symbol: starting nonterminal to grammar
+
+    Returns:
+        Set of pair of vertices that connected by satisfying path
+    """
 
     if not isinstance(starting_symbol, Variable):
         starting_symbol = Variable(starting_symbol)
@@ -93,6 +124,7 @@ def helling_constrained_transitive_closure(
 
     """
     Calculates transitive closure of graph with constrained by given grammar
+    by Helling's algorithm
 
     Args:
         graph: graph with necessary information
@@ -160,6 +192,18 @@ def helling_constrained_transitive_closure(
 def matrix_constrained_transitive_closure(
     graph: Graph, contex_free_grammar: CFG
 ) -> set:
+
+    """
+    Calculates transitive closure of graph with constrained by given grammar
+    by matrix algorithm
+
+    Args:
+        graph: graph with necessary information
+        contex_free_grammar: contex free grammar that represent constrains
+
+    Returns:
+        Transitive closure of graph
+    """
 
     weak_form_of_grammar = contex_free_to_weak_chomsky_form(contex_free_grammar)
 
