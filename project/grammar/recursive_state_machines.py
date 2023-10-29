@@ -1,6 +1,8 @@
 from collections import namedtuple
 from pathlib import Path
 
+from scipy.sparse import dok_array
+
 from project.utils.bin_matrix_utils import StateInfo, BinaryMatrix
 from project.grammar.extended_contex_free_grammar import (
     ExtendedContexFreeGrammar,
@@ -95,7 +97,7 @@ def build_binary_matrix_by_rsm(recursive_state_machine: RecursiveStateMachine) -
     )
     states.sort(key=lambda state: (state.value[0].value, state.value[1]))
 
-    matrxies = {}
+    matrixes = {}
     count_of_states = len(states)
 
     for variable, subautomata in recursive_state_machine.subautomatons.items():
