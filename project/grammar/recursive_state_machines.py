@@ -72,7 +72,9 @@ def minimize_recursive_state_machine(
     return recursive_state_machine
 
 
-def build_binary_matrix_by_rsm(recursive_state_machine: RecursiveStateMachine) -> BinaryMatrix:
+def build_binary_matrix_by_rsm(
+    recursive_state_machine: RecursiveStateMachine,
+) -> BinaryMatrix:
 
     """
     Builds binary matrix of given recursive state machine
