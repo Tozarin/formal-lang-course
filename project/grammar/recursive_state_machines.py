@@ -1,7 +1,7 @@
 from collections import namedtuple
 from pathlib import Path
 
-from project.utils.bina_matrix_utils import StateInfo, BinaryMatrix
+from project.utils.bin_matrix_utils import StateInfo, BinaryMatrix
 from project.grammar.extended_contex_free_grammar import (
     ExtendedContexFreeGrammar,
     extended_contex_free_grammar_from_string,
@@ -70,7 +70,7 @@ def minimize_recursive_state_machine(
     return recursive_state_machine
 
 
-def build_binary_matrix_by_rsm(recursive_state_machine: RSM) -> BinaryMatrix:
+def build_binary_matrix_by_rsm(recursive_state_machine: RecursiveStateMachine) -> BinaryMatrix:
 
     """
     Builds binary matrix of given recursive state machine
