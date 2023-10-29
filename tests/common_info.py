@@ -242,3 +242,23 @@ helling_examples = [
         {("1", "3"), ("0", "3")},
     ),
 ]
+
+build_binary_matrix_rsm = [
+    ("S -> a", [(("S", 0), True, False), (("S", 1), False, True)], {"a": [[0, 1]]}),
+    (
+        "S -> A\nA -> B C\nB -> b\nC -> c",
+        [
+            (("A", 0), True, False),
+            (("A", 1), False, True),
+            (("A", 2), False, False),
+            (("A", 3), False, False),
+            (("B", 0), True, False),
+            (("B", 1), False, True),
+            (("C", 0), True, False),
+            (("C", 1), False, True),
+            (("S", 0), True, False),
+            (("S", 1), False, True),
+        ],
+        {"A": [[8, 9]], "B": [[0, 2]], "C": [[3, 1]], "b": [[4, 5]], "c": [[6, 7]], "epsilon": [[2, 3]]},
+    ),
+]
