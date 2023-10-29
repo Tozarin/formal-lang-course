@@ -30,8 +30,13 @@ nondeterministic_automata_for_build_test = [
 ]
 
 transitive_closure_test = [
-    ([(0, "b", 0), (0, "a", 1), (1, "b", 1), (1, "a", 0)], [0], [1], [[1, 1], [1, 1]]),
-    ([(0, "a", 1), (1, "b", 0)], [0], [1, 2], [[1, 1, 0], [1, 1, 0], [0, 0, 0]]),
+    (
+        [(0, "b", 0), (0, "a", 1), (1, "b", 1), (1, "a", 0)],
+        [0],
+        [1],
+        {(0, 1), (1, 0), (1, 1), (0, 0)},
+    ),
+    ([(0, "a", 1), (1, "b", 0)], [0], [1, 2], {(0, 1), (1, 0), (1, 1), (0, 0)}),
 ]
 
 # first_cycle, second_cycle, (first_cycle_mark, second_cycle_mark), regular_expression, starting_states, finale_states, expected_output

@@ -1,19 +1,20 @@
 from collections import namedtuple
+from itertools import product
 
 from pyformlang.finite_automaton import NondeterministicFiniteAutomaton, State
 from scipy.sparse import (
     dok_matrix,
     kron,
-    block_diag,
-    lil_matrix,
+    dok_array,
     csr_array,
     lil_array,
     vstack,
+    bmat,
 )
 
-BinaryMatrix = namedtuple(
-    "BinaryMatrix", ["starting_states", "final_states", "indexes", "matrix"]
-)
+StateInfo = namedtuple("StateInfo", ["value", "is_start", "is_final"])
+
+BinaryMatrix = namedtuple("BinaryMatrix", ["states", "matrix"])
 
 
 def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMatrix:
@@ -26,42 +27,38 @@ def build_binary_matrix_by_nfa(nfa: NondeterministicFiniteAutomaton) -> BinaryMa
         nfa: nondeterministic automaton that would be base
 
     Returns:
-        BinaryMatrix - namedtuple that contains starting states, final states,
-        dictionary that mathes indexes of binnary matrix and numbers of states,
+        BinaryMatrix - namedtuple that contains states and
         decomposition of binary matrix
     """
 
-    indexes = {state: index for index, state in enumerate(nfa.states)}
-
-    matrix = dict()
-    nfa_dict = nfa.to_dict()
-
-    count_of_states = len(nfa.states)
-
-    for mark in nfa.symbols:
-        tmp_matrix = lil_matrix((count_of_states, count_of_states), dtype=bool)
-
-        for state_from, transitions in nfa_dict.items():
-            states_to = set()
-            if mark in transitions:
-                state = transitions[mark]
-                if isinstance(state, set):
-                    states_to = state
-                else:
-                    states_to = {state}
-            for state_to in states_to:
-                tmp_matrix[
-                    indexes[state_from],
-                    indexes[state_to],
-                ] = True
-        matrix[mark] = tmp_matrix
-
-    return BinaryMatrix(
-        nfa.start_states,
-        nfa.final_states,
-        indexes,
-        matrix,
+    states = list(
+        StateInfo(state.value, state in nfa.start_states, state in nfa.final_states)
+        for state in nfa.states
     )
+    count_of_states = len(states)
+    transitions = nfa.to_dict()
+    matrixes = {}
+
+    for node_from in transitions:
+        for mark, nodes_to in transitions[node_from].items():
+            matrix = matrixes.setdefault(
+                mark.value, dok_array((count_of_states, count_of_states), dtype=bool)
+            )
+            index_from = next(
+                index for index, state in enumerate(states) if state.value == node_from
+            )
+            for node_to in nodes_to if isinstance(nodes_to, set) else {nodes_to}:
+                index_to = next(
+                    index
+                    for index, state in enumerate(states)
+                    if state.value == node_to
+                )
+                matrix[index_from, index_to] = True
+
+    for key in matrixes:
+        matrixes[key] = matrixes[key].tocsr()
+
+    return BinaryMatrix(states, matrixes)
 
 
 def build_nfa_by_binary_matrix(
@@ -79,8 +76,6 @@ def build_nfa_by_binary_matrix(
     """
 
     matrix = bin_matrix.matrix
-    indexes = bin_matrix.indexes
-
     nfa = NondeterministicFiniteAutomaton()
 
     for mark in matrix.keys():
@@ -88,17 +83,22 @@ def build_nfa_by_binary_matrix(
         for i in range(len(marked_array)):
             for j in range(len(marked_array)):
                 if marked_array[i][j]:
-                    nfa.add_transition(indexes[State(i)], mark, indexes[State(j)])
+                    nfa.add_transition(
+                        State(bin_matrix.states[i].value),
+                        mark,
+                        State(bin_matrix.states[j].value),
+                    )
 
-    for starting_state in bin_matrix.starting_states:
-        nfa.add_start_state(indexes[State(starting_state)])
-    for final_state in bin_matrix.final_states:
-        nfa.add_final_state(indexes[State(final_state)])
+    for state in bin_matrix.states:
+        if state.is_start:
+            nfa.add_start_state(State(state.value))
+        if state.is_final:
+            nfa.add_final_state(State(state.value))
 
     return nfa
 
 
-def transitive_closure(bin_matrix: BinaryMatrix) -> lil_matrix:
+def transitive_closure(bin_matrix: BinaryMatrix) -> tuple:
 
     """
     Calculates transitive closure of graph that is represented by binary matrix
@@ -110,22 +110,22 @@ def transitive_closure(bin_matrix: BinaryMatrix) -> lil_matrix:
         Transitive closure of graph
     """
 
-    if not bin_matrix.matrix.values():
-        return lil_array((1, 1)).tocsr()
+    count_of_states = len(bin_matrix.states)
+    transitive_closure = sum(
+        bin_matrix.matrix.values(),
+        start=csr_array((count_of_states, count_of_states), dtype=bool),
+    )
+    transitive_closure.eliminate_zeros()
 
-    transitive_closure = sum(bin_matrix.matrix.values())
+    while True:
+        prev_count_of_nonzero_elems = transitive_closure.nnz
 
-    prev_count_of_nonzero_elems = transitive_closure.count_nonzero()
-    curr_count_of_nonzero_elems = 0
-
-    while prev_count_of_nonzero_elems != curr_count_of_nonzero_elems:
         transitive_closure += transitive_closure @ transitive_closure
-        prev_count_of_nonzero_elems, curr_count_of_nonzero_elems = (
-            curr_count_of_nonzero_elems,
-            transitive_closure.count_nonzero(),
-        )
 
-    return transitive_closure
+        if prev_count_of_nonzero_elems == transitive_closure.nnz:
+            break
+
+    return transitive_closure.nonzero()
 
 
 def intersect_of_automata_by_binary_matixes(
@@ -143,39 +143,35 @@ def intersect_of_automata_by_binary_matixes(
         Binary matrix that represent intersect of automata
     """
 
-    marks = left_bin_matrix.matrix.keys() & right_bin_matrix.matrix.keys()
-
-    matrix = dict()
-    starting_states = set()
-    final_states = set()
-    indexes = {}
-
-    for mark in marks:
-        matrix[mark] = kron(
-            left_bin_matrix.matrix[mark],
-            right_bin_matrix.matrix[mark],
-            format="csr",
+    states = [
+        StateInfo(
+            (left_state.value, right_state.value),
+            left_state.is_start and right_state.is_start,
+            left_state.is_final and right_state.is_final,
         )
+        for left_state, right_state in product(
+            left_bin_matrix.states, right_bin_matrix.states
+        )
+    ]
 
-    for left_state, left_index in left_bin_matrix.indexes.items():
-        for right_state, right_index in right_bin_matrix.indexes.items():
-            new_state = new_index = (
-                left_index * len(right_bin_matrix.indexes) + right_index
+    count_of_states = len(states)
+    matrixes = {}
+
+    for mark in set(left_bin_matrix.matrix.keys()).union(
+        set(right_bin_matrix.matrix.keys())
+    ):
+        if mark in left_bin_matrix.matrix and mark in right_bin_matrix.matrix:
+            matrixes[mark] = csr_array(
+                kron(
+                    left_bin_matrix.matrix[mark],
+                    right_bin_matrix.matrix[mark],
+                    format="csr",
+                )
             )
-            indexes[new_state] = new_index
+        else:
+            matrixes[mark] = csr_array((count_of_states, count_of_states), dtype=bool)
 
-            if (
-                left_state in left_bin_matrix.starting_states
-                and right_state in right_bin_matrix.starting_states
-            ):
-                starting_states.add(new_state)
-            if (
-                left_state in left_bin_matrix.final_states
-                and right_state in right_bin_matrix.final_states
-            ):
-                final_states.add(new_state)
-
-    return BinaryMatrix(starting_states, final_states, indexes, matrix)
+    return BinaryMatrix(states, matrixes)
 
 
 def direct_sum(
@@ -194,31 +190,27 @@ def direct_sum(
         Dictionary where keys-marks matched with direct sums of corresponding matrixes
     """
 
-    result_matrix = dict()
-    size_of_right_matrix = len(right_bin_matrix.indexes)
+    states = left_bin_matrix.states + right_bin_matrix.states
+    matrixes = dict()
 
-    for mark in left_bin_matrix.matrix.keys():
-        result_matrix[mark] = csr_array(
-            block_diag(
-                (
-                    left_bin_matrix.matrix[mark],
-                    (
-                        dok_matrix((size_of_right_matrix, size_of_right_matrix))
-                        if mark not in right_bin_matrix.matrix.keys()
-                        else right_bin_matrix.matrix[mark]
-                    ),
-                )
+    for mark in set(left_bin_matrix.matrix.keys()).intersection(
+        set(right_bin_matrix.matrix.keys())
+    ):
+        matrixes[mark] = csr_array(
+            bmat(
+                [
+                    [left_bin_matrix.matrix[mark], None],
+                    [None, right_bin_matrix.matrix[mark]],
+                ]
             )
         )
 
-    return result_matrix
+    return BinaryMatrix(states, matrixes)
 
 
 def init_front(
-    width: int,
-    hight: int,
-    indexes: dict,
-    starting_states: set,
+    states_of_graph: list,
+    states_of_request: list,
     starting_row: lil_array,
 ) -> csr_array:
 
@@ -226,71 +218,60 @@ def init_front(
     Initiates front matrix for bfs algorithm
 
     Args:
-        width: width of front matrix
-        hight: hight of front matrix
-        indexes: indexes that matched with states of working matrix
-        starting_states: states that algorithm start from
+        states_of_graph: states of used graph
+        states_of_request: states of used request
         starting_row: default values of working part of front
 
     Returns:
         Front matrix
     """
 
+    width = len(states_of_request)
+    hight = len(states_of_request) + len(states_of_graph)
     front = lil_array((width, hight))
 
-    for state, index in indexes.items():
-        if state in starting_states:
-            front[index, index] = 1
+    for index, state in enumerate(states_of_request):
+        if state.is_start:
+            front[index, index] = True
             front[index, width:] = starting_row
 
     return front.tocsr()
 
 
 def init_separeted_front(
-    width: int,
-    hight: int,
-    indexes: dict,
-    starting_states_for_fronts: set,
-    graph_indexes: dict,
-    starting_states: set,
-) -> (csr_array, list):
+    states_of_graph: list,
+    states_of_request: list,
+    starting_indexes: list,
+) -> csr_array:
 
     """
     Initiates front matrixes for separete variant of bfs algorithm
 
     Args:
-        width: width of front matrix
-        hight: hight of front matrix
-        indexes: indexes that matched with states of working matrix
-        starting_states_for_fronts: starting states for each front
-        graph_indexes: indexes that matched with states of working graph
-        starting_states: separeted states that algorithm start from
+        states_of_graph: states of used graph
+        states_of_request: states of used request
+        starting_indexes: indexes of starting states
 
     Returns:
         Front matrixes that represented as one matrix with list of starting statesx
     """
 
-    fronts = []
-    list_of_starting_states = []
+    width = len(states_of_request)
+    hight = len(states_of_graph)
 
-    for starting_state in starting_states:
-        list_of_starting_states.append(starting_state)
-
-        fronts.append(
-            init_front(
-                width,
-                hight,
-                indexes,
-                starting_states_for_fronts,
-                lil_array(
-                    [[int(starting_state == state) for state in graph_indexes.keys()]]
-                ),
-            )
+    fronts = [
+        init_front(
+            states_of_graph,
+            states_of_request,
+            lil_array([index == starting_index for index in range(hight)], dtype=bool),
         )
+        for starting_index in starting_indexes
+    ]
 
     return (
-        csr_array(vstack(fronts)) if len(fronts) > 0 else csr_array((width, hight)),
-        list_of_starting_states,
+        csr_array(vstack(fronts))
+        if len(fronts)
+        else csr_array((width, hight + hight), dtype=bool)
     )
 
 
@@ -310,14 +291,14 @@ def sort_left_part_of_front(
         Sorted front
     """
 
-    new_front = lil_array(front.shape)
+    new_front = lil_array(front.shape, dtype=bool)
 
     for i, j in zip(*front.nonzero()):
         if j < size_of_left_part:
             non_zero_row_right_of_row = front[[i]].tolil()[[0], size_of_left_part:]
             if non_zero_row_right_of_row.nnz > 0:
                 row_shift = i // size_of_left_part
-                new_front[row_shift + j, j] = 1
+                new_front[row_shift + j, j] = True
                 new_front[
                     [row_shift + j], size_of_left_part:
                 ] += non_zero_row_right_of_row

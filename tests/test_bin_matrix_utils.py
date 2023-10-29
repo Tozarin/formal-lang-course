@@ -99,7 +99,6 @@ def test_transitive_closure():
     ) in transitive_closure_test:
         nfa = build_nfa(transitions_list, starting_states, final_states)
         binary_matrix = build_binary_matrix_by_nfa(nfa)
-        geted_closure = transitive_closure(binary_matrix)
-        expected_closure = dok_matrix(expected)
+        geted_closure = set(zip(*transitive_closure(binary_matrix)))
 
-        assert geted_closure.toarray().data == expected_closure.toarray().data
+        assert geted_closure == expected

@@ -4,7 +4,7 @@ from typing import Set, Tuple
 from cfpq_data import download, graph_from_csv, labeled_two_cycles_graph
 from networkx import MultiDiGraph, drawing
 from pyformlang.regular_expression import Regex
-from scipy.sparse import lil_array, lil_matrix
+from scipy.sparse import lil_array, csr_array
 
 from project.utils.automata_utils import (
     gen_min_dfa_by_reg,
@@ -143,20 +143,13 @@ def regular_request(
     tran_closure = transitive_closure(intersect)
 
     result = set()
-    indexes = {i: st for st, i in binary_matrix_of_graph.indexes.items()}
-
-    lenght_of_reg_request_matrix = len(binary_matrix_of_regular_request.indexes)
-    for state_from, state_to in zip(*tran_closure.nonzero()):
-        if (
-            state_from in intersect.starting_states
-            and state_to in intersect.final_states
-        ):
-            result.add(
-                (
-                    indexes[state_from // lenght_of_reg_request_matrix],
-                    indexes[state_to // lenght_of_reg_request_matrix],
-                )
-            )
+    for node_from_index, node_to_index in zip(*tran_closure):
+        node_from = intersect.states[node_from_index]
+        node_to = intersect.states[node_to_index]
+        if node_from.is_start and node_to.is_final:
+            start_node = node_from.value[0]
+            final_node = node_to.value[0]
+            result.add((start_node, final_node))
 
     return result
 
@@ -189,8 +182,8 @@ def bfs_regular_request(
     )
     binary_matrix_of_request = build_binary_matrix_by_nfa(gen_min_dfa_by_reg(reg))
 
-    size_of_graph = len(binary_matrix_of_graph.indexes)
-    size_of_request = len(binary_matrix_of_request.indexes)
+    size_of_graph = len(binary_matrix_of_graph.states)
+    size_of_request = len(binary_matrix_of_request.states)
 
     if not size_of_graph:
         return set()
@@ -198,73 +191,71 @@ def bfs_regular_request(
     direct_sum_of_matrixes = direct_sum(
         binary_matrix_of_request, binary_matrix_of_graph
     )
-    indexes_of_graph_starting_states = []
 
-    if separated_flag:
-        front, indexes_of_graph_starting_states = init_separeted_front(
-            size_of_request,
-            size_of_request + size_of_graph,
-            binary_matrix_of_request.indexes,
-            binary_matrix_of_request.starting_states,
-            binary_matrix_of_graph.indexes,
-            binary_matrix_of_graph.starting_states,
-        )
-    else:
-        front = init_front(
-            size_of_request,
-            size_of_request + size_of_graph,
-            binary_matrix_of_request.indexes,
-            binary_matrix_of_request.starting_states,
+    starting_indexes = [
+        index
+        for index, state in enumerate(binary_matrix_of_graph.states)
+        if state.is_start
+    ]
+
+    front = (
+        init_front(
+            binary_matrix_of_graph.states,
+            binary_matrix_of_request.states,
             lil_array(
-                [
-                    [
-                        int(state in binary_matrix_of_graph.starting_states)
-                        for state in binary_matrix_of_graph.indexes.keys()
-                    ]
-                ]
+                [state.is_start for state in binary_matrix_of_graph.states], dtype=bool
             ),
         )
+        if not separated_flag
+        else init_separeted_front(
+            binary_matrix_of_graph.states,
+            binary_matrix_of_request.states,
+            starting_indexes,
+        )
+    )
 
-    visited_states = lil_matrix(front.shape)
+    visited_states = csr_array(front.shape, dtype=bool)
+    direct_sum_of_matrixes = direct_sum(
+        binary_matrix_of_request, binary_matrix_of_graph
+    )
 
     while True:
-        tmp_visited_states = visited_states.copy()
+        previos_nnz = visited_states.nnz
 
-        for matrix in direct_sum_of_matrixes.values():
+        for matrix in direct_sum_of_matrixes.matrix.values():
             new_front = visited_states @ matrix if front is None else front @ matrix
             visited_states += sort_left_part_of_front(size_of_request, new_front)
 
         front = None
 
-        if visited_states.nnz == tmp_visited_states.nnz:
+        if visited_states.nnz == previos_nnz:
             break
 
     result = set()
-    graph_indexes = {
-        index: state for state, index in binary_matrix_of_graph.indexes.items()
-    }
-    request_final_states_indexes = {
-        index
-        for state, index in binary_matrix_of_request.indexes.items()
-        if state in binary_matrix_of_request.final_states
-    }
-    graph_final_states_indexes = {
-        index
-        for state, index in binary_matrix_of_graph.indexes.items()
-        if state in binary_matrix_of_graph.final_states
-    }
-
     for i, j in zip(*visited_states.nonzero()):
-        if j >= size_of_request and i % size_of_request in request_final_states_indexes:
+        if (
+            j >= size_of_request
+            and binary_matrix_of_request.states[i % size_of_request].is_final
+        ):
             graph_index = j - size_of_request
-            if graph_index in graph_final_states_indexes:
+            if binary_matrix_of_graph.states[graph_index].is_final:
                 result.add(
-                    graph_indexes[graph_index]
+                    graph_index
                     if not separated_flag
                     else (
-                        indexes_of_graph_starting_states[i // size_of_request],
-                        graph_indexes[graph_index],
+                        starting_indexes[i // size_of_request],
+                        graph_index,
                     )
                 )
 
-    return result
+    return (
+        {
+            (
+                binary_matrix_of_graph.states[i].value,
+                binary_matrix_of_graph.states[j].value,
+            )
+            for i, j in result
+        }
+        if separated_flag
+        else {binary_matrix_of_graph.states[i].value for i in result}
+    )
