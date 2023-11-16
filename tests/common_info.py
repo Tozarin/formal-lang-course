@@ -165,3 +165,14 @@ names_of_grammar_files = [
     ("fifth.grammar", "S", "S -> A S | ending\nA -> a", "S"),
     ("sixth.grammar", "S", "S -> epsilon", "S"),
 ]
+
+common_starting_symbol = "S"
+
+extended_grammars = [
+    ("S -> a", ["S"], ["a"], {"S": "a"}),
+    ("S -> a b S", ["S"], ["a", "b"], {"S": "a b"}),
+    ("S -> a N\nN -> b", ["S", "N"], ["a", "b"], {"S": "a", "N": "b"}),
+    ("S -> epsilon", ["S"], [], {"S": ""}),
+    ("S -> endpoint", ["S"], [], {"S": ""}),
+    ("S -> [a b]", ["S"], ["a", "b"], {"S": "[a b]"}),
+]
