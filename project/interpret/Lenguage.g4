@@ -1,6 +1,6 @@
 grammar Lenguage;
 
-programm : EOL* ((COMMENT EOL+)* statement COMMENT? EOL+ (COMMENT EOL+)*)*;
+programm : EOL* ((COMMENT EOL+)* statement COMMENT? EOL+ (COMMENT EOL+)*)* (statement COMMENT?)? EOF;
 
 statement : 
     | VAR EQ expr
