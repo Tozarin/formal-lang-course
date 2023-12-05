@@ -19,7 +19,8 @@ expr :
     | NOT expr
     | expr OR expr
     | expr AND expr
-    | LT (expr (COMMA expr)*)? RT
+    | LT RT
+    | LT expr (COMMA expr)* RT
     | LT INT DOTS INT RT
     | expr STARTING
     | expr FINAL
