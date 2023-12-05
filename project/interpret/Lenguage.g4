@@ -51,7 +51,7 @@ pattern :
     | LP pattern COMMA pattern RP
     ;
 
-path : (SLASH STRING)+;
+path : (SLASH STRING)+ (DOT STRING)?;
 
 PRINT : 'print';
 
@@ -85,6 +85,7 @@ STAR : '*';
 EQ : ':=';
 COMMA : ',';
 DOTS : '..';
+DOT : '.';
 ARROW : '=>';
 LP : '(';
 RP : ')';
