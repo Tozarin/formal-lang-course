@@ -35,7 +35,7 @@ expr :
     | expr ADDSTARTING expr
     | expr ADDFINAL expr
     | LOADDOT VAR
-    | LOADDOT path
+    | LOADDOT STRING
     | LOADGRAPH VAR
     | LOADGRAPH STRING
     | expr INTER expr
@@ -50,8 +50,6 @@ pattern :
     | VAR
     | LP pattern COMMA pattern RP
     ;
-
-path : (SLASH STRING)+ (DOT STRING)?;
 
 PRINT : 'print';
 
@@ -85,13 +83,11 @@ STAR : '*';
 EQ : ':=';
 COMMA : ',';
 DOTS : '..';
-DOT : '.';
 ARROW : '=>';
 LP : '(';
 RP : ')';
 LT : '<|';
 RT : '|>';
-SLASH : '/';
 UNDER : '_';
 
 STRING : '"' ~[\n]* '"';
