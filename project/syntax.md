@@ -5,14 +5,14 @@
 ```
 programm = List<statment>
 
-statment = 
+statment =
     | Bind of var * expr            // привязка значения к имени
     | Print of expr                 // print
 
 var = name
-name = string 
+name = string
 
-expr = 
+expr =
     | Var of var                    // переменные
     | Const of const                // константы
     | Set of List<expr>             // множество
@@ -39,7 +39,7 @@ expr =
     | GetEdges of expr              // получение всех граней
     | GetMarks of expr              // получение всех меток на гранях
 
-const = 
+const =
     | Regex of regex                // регулярное выражение, заданное регулярным выражением
     | Cfg of grammar                // контекстно свободная грамматика, зданная контекстно свободной грамматикой
     | String of string              // строчка
@@ -48,7 +48,7 @@ const =
 
 lambda = pattern * expr
 
-pattern = 
+pattern =
     | Any                           // _
     | Name of name                  // именованное значение
     | Pair of pattern * pattern     // пары
@@ -61,7 +61,7 @@ programm -> EOL* (comms* statement COMMENT? EOL+ comms*)*
 
 comms -> (COMMENT EOL+)*
 
-statement -> 
+statement ->
     | var ':=' expr
     | 'print' expr
 
