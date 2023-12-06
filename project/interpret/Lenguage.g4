@@ -2,7 +2,7 @@ grammar Lenguage;
 
 programm : EOL* ((COMMENT EOL+)* statement COMMENT? EOL+ (COMMENT EOL+)*)* (statement COMMENT?)? EOF;
 
-statement : 
+statement :
     | VAR EQ expr
     | PRINT expr
     ;
@@ -28,8 +28,8 @@ expr :
     | expr EDGES
     | expr MARKS
     | expr REACHABLES
-    | MAP LP pattern ARROW expr RP expr
-    | FILTER LP pattern ARROW expr RP expr
+    | expr MAP LP pattern ARROW expr RP
+    | expr FILTER LP pattern ARROW expr RP
     | expr SETSTARTING expr
     | expr SETFINAL expr
     | expr ADDSTARTING expr
