@@ -111,8 +111,8 @@ set ->
     | graph 'edges'
     | graph 'marks'
     | graph 'reachables'
-    | 'map' '(' pattern '=>' expr ')' set
-    | 'filter' '(' pattern '=>' bool ')' set
+    | set 'map' '(' pattern '=>' expr ')'
+    | set 'filter' '(' pattern '=>' bool ')'
     | '(' set ')'
 
 petterin ->
