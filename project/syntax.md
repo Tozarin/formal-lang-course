@@ -57,9 +57,10 @@ pattern =
 ## Грамматика
 
 ```
-programm -> EOL* (comms* statement COMMENT? EOL+ comms*)*
+programm -> (comms stmtcomms EOL+ comms)* stmtcomms?
 
 comms -> (COMMENT EOL+)*
+stmtcomms -> statement COMMENT?
 
 statement ->
     | var ':=' expr
