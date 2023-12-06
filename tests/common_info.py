@@ -269,3 +269,41 @@ build_binary_matrix_rsm = [
         },
     ),
 ]
+
+parser_test_true = [
+    "x := y",
+    "x := _y",
+    "x := Y",
+    "x := _sOmEvArIaBlE1488",
+    "x := 42",
+    "x := 0",
+    "x := 01",
+    "x := 0000",
+    "x := -123",
+    "x := true",
+    "x := false",
+    'x := r"a* b* (c | d)* "',
+    'x := r"S -> a S b | a b $"',
+    "x := graph set_starting <|1, 2, 3|>",
+    "x := graph set_starting <|1 .. 3|>",
+    "x := graph starting",
+    "x := (graph reachables)",
+    "x := set map (v => 1)",
+    "x := set filter (v => 1)",
+    "x := set filter (v => v in <|1 .. 10|>) ",
+    'x := load_dot "some.dot"',
+    "x := a and b",
+    "x := a*",
+]
+parser_test_false = [
+    "",
+    "x := 1y",
+    "x := graph set_starting",
+    "x := graph set_starting a b",
+    "x := set_final <|1 .. 3|>",
+    "x := map (v => 1)",
+    "x := <|,|>",
+]
+
+parser_dot_test = 'x := load_graph "skos" set_starting <|1 .. 10|> reachables map ((_, f) => f)\nprint x'
+parser_dot_test_example = "ast_test_example.dot"
