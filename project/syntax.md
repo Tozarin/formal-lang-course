@@ -69,7 +69,6 @@ expr ->
     | var
     | const
     | bool
-    | graph
     | set
     | '(' expr ',' expr ')'
     | '(' expr ')'
@@ -94,7 +93,7 @@ graph ->
 
 bool ->
     | var
-    | 'true'
+    | 'true
     | 'false'
     | expr 'in' expr                    // одно выражение содержится в другом
     | 'not' bool
@@ -131,7 +130,7 @@ STRING -> '"' ~[\n]* '"'
 INT -> '-'? [1-9][0-9]*
 REGEX -> 'r' STRING
 CFG -> 'g' STRING
-PATH -> ('/' STRING)+
+PATH -> ('/' STRING)?
 
 COMMENT -> '@' ~[\n]*
 EOL -> [\n]+
