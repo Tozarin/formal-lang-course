@@ -111,8 +111,8 @@ set ->
     | graph 'edges'
     | graph 'marks'
     | graph 'reachables'
-    | 'map' '(' pattern '=>' expr ')' set
-    | 'filter' '(' pattern '=>' bool ')' set
+    | set 'map' '(' pattern '=>' expr ')'
+    | set 'filter' '(' pattern '=>' bool ')'
     | '(' set ')'
 
 petterin ->
@@ -140,29 +140,29 @@ EOL -> [\n]+
 
 Получение достижимых вершин
 ```
-graph = load_graph "skos" set_starting <|0 .. 9|>
+graph := load_graph "skos" set_starting <|0 .. 9|>
 
-result = map ((_, final) => final) (graph reachables)
+result := graph reachables map ((_, f) => f)
 
 print result
 ```
 
 Получение пар вершин, между которым существуют путь, удовлетворяющий ограничениям контекстно свободной грамматики
 ```
-grammar = g"S -> a S b | a b"
-regex = r"a b"
+grammar := g"S -> a S b | a b"
+regex := r"a b"
 
-result = map ((u, _), (v, _) => (u, v)) ((grammar intersect regex) reachables)
+result := grammar intersect regex reachables map (((u, _), (v, _)) => (u, v))
 
 print result
 ```
 
 Получение множества общих меток графов
 ```
-wine = load_graph "wine"
-skos = load_graph "skos"
+wine := load_graph "wine"
+skos := load_graph "skos"
 
-marks = filter (mark => mark in (wine marks)) (skos marks)
+ms := skos marks filter (mark => mark in (wine marks))
 
-print marks
+print ms
 ```
