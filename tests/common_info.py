@@ -294,6 +294,9 @@ parser_test_true = [
     'x := load_dot "some.dot"',
     "x := a and b",
     "x := a*",
+    "ms := skos marks filter (mark => mark in (wine marks))",
+    "result := grammar intersect regex reachables map (((u, _), (v, _)) => (u, v))",
+    "result := graph reachables map ((_, f) => f)",
 ]
 parser_test_false = [
     "",
