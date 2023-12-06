@@ -306,6 +306,7 @@ parser_test_false = [
     "x := set_final <|1 .. 3|>",
     "x := map (v => 1)",
     "x := <|,|>",
+    "print",
 ]
 
 parser_dot_test = 'x := load_graph "skos" set_starting <|1 .. 10|> reachables map ((_, f) => f)\nprint x'

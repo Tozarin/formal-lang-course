@@ -38,6 +38,8 @@ expr =
     | GetVertexes of expr           // получение всех вершин
     | GetEdges of expr              // получение всех граней
     | GetMarks of expr              // получение всех меток на гранях
+    | Pair of expr * expr           // пары
+    | Triple of expr * expr * expr  // тройки
 
 const =
     | Regex of regex                // регулярное выражение, заданное регулярным выражением
@@ -51,7 +53,8 @@ lambda = pattern * expr
 pattern =
     | Any                           // _
     | Name of name                  // именованное значение
-    | Pair of pattern * pattern     // пары
+    | Pair of pattern * pattern     // пары, тройки
+    | Triple of pattern * pattern * pattern
 ```
 
 ## Грамматика
@@ -71,6 +74,7 @@ expr ->
     | bool
     | set
     | '(' expr ',' expr ')'
+    | '(' expr ',' expr ',' expr ')'
     | '(' expr ')'
 
 graph ->
@@ -119,6 +123,7 @@ petterin ->
     | '_'
     | var
     | '(' pattern ',' pattern ')'
+    | '(' pattern ',' pattern ',' pattern ')'
 
 var -> [a-zA-Z_][a-zA-Z0-9_]*
 

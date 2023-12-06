@@ -15,12 +15,12 @@ expr :
     | REGEX
     | CFG
     | LP expr COMMA expr RP
+    | LP expr COMMA expr COMMA expr RP
     | expr IN expr
     | NOT expr
     | expr OR expr
     | expr AND expr
-    | LT RT
-    | LT expr (COMMA expr)* RT
+    | LT (expr (COMMA expr)*)? RT
     | LT INT DOTS INT RT
     | expr STARTING
     | expr FINAL
@@ -49,6 +49,7 @@ pattern :
     | UNDER
     | VAR
     | LP pattern COMMA pattern RP
+    | LP pattern COMMA pattern COMMA pattern RP
     ;
 
 PRINT : 'print';
