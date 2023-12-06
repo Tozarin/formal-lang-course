@@ -23,11 +23,16 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Set up java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install antls4-tools
 
       - name: Parser generate
         working-directory: project/interpret
