@@ -8,13 +8,24 @@ from pyformlang.regular_expression import Regex
 from networkx.drawing.nx_pydot import read_dot
 
 from project.grammar.extended_contex_free_grammar import extend_contex_free_grammar
-from project.grammar.recursive_state_machines import recursive_state_machine_from_extended_contex_free_grammar, reachables
+from project.grammar.recursive_state_machines import (
+    recursive_state_machine_from_extended_contex_free_grammar,
+    reachables,
+)
 from project.utils.grammar_utils import read_contex_free_grammar_from_file
-from project.utils.automata_utils import gen_nfa_by_graph, gen_min_dfa_by_reg, intersect_of_automata
+from project.utils.automata_utils import (
+    gen_nfa_by_graph,
+    gen_min_dfa_by_reg,
+    intersect_of_automata,
+)
 from project.utils.graph_utils import get_graph
-from project.utils.bin_matrix_utils import build_binary_matrix_by_nfa, transitive_closure
+from project.utils.bin_matrix_utils import (
+    build_binary_matrix_by_nfa,
+    transitive_closure,
+)
 
-class LSet():
+
+class LSet:
     def __init__(self, elems: set, ttype=None):
         if len(elems) == 0:
             self.type = None
@@ -49,17 +60,20 @@ class LSet():
         return not (self.type is None) and elem in self.set
 
     def __len__(self) -> int:
-        return len(self.set) 
+        return len(self.set)
 
     def __hash__(self):
         return hash(self.set)
 
     __repr__ = __str__
 
-class LPair():
+
+class LPair:
     def __init__(self, starting, final):
         if type(starting) != type(final):
-            raise TypeError("Types of starting and final nodes of edge must be same type")
+            raise TypeError(
+                "Types of starting and final nodes of edge must be same type"
+            )
 
         self.starting = starting
         self.final = final
@@ -74,7 +88,7 @@ class LPair():
     def __eq__(self, second: "LPair") -> bool:
         if self.type != second.type:
             raise TypeError("To equal pairs must be same type")
-            
+
         return self.starting == second.starting and self.final == second.final
 
     def __hash__(self):
@@ -82,10 +96,13 @@ class LPair():
 
     __repr__ = __str__
 
-class LTriple():
+
+class LTriple:
     def __init__(self, starting, mark, final):
         if type(starting) != type(final):
-            raise TypeError("Types of starting and final nodes of edge must be same type")
+            raise TypeError(
+                "Types of starting and final nodes of edge must be same type"
+            )
 
         self.starting = starting
         self.final = final
@@ -102,14 +119,19 @@ class LTriple():
         if self.type != second.type:
             raise TypeError("To equal triples must be same type")
 
-        return self.starting == second.starting and self.final == second.final and self.mark == second.mark
+        return (
+            self.starting == second.starting
+            and self.final == second.final
+            and self.mark == second.mark
+        )
 
     def __hash__(self):
         return hash(self.to_tuple())
 
     __repr__ = __str__
 
-class LAutoma():
+
+class LAutoma:
     @abstractmethod
     def from_file(self, path: Path) -> "LAutoma":
         ...
@@ -170,18 +192,25 @@ class LAutoma():
     def concat(self, second: "LAutoma") -> "LAutoma":
         ...
 
+
 class LCFG(LAutoma, ABC):
     def __init__(self, grammar: CFG):
         self.grammar = grammar
         self.type = LSet({variable.value for variable in grammar.variables}).type
         extednded_grammar = extend_contex_free_grammar(grammar)
-        self.rsm = recursive_state_machine_from_extended_contex_free_grammar(extednded_grammar, extednded_grammar.starting_symbol)
+        self.rsm = recursive_state_machine_from_extended_contex_free_grammar(
+            extednded_grammar, extednded_grammar.starting_symbol
+        )
 
     def __str__(self) -> str:
         return self.grammar.to_text()
 
     def __eq__(self, second: "LCFG") -> bool:
-        return self.grammar == second.grammar and self.type == second.type and self.rsm == second.rsm
+        return (
+            self.grammar == second.grammar
+            and self.type == second.type
+            and self.rsm == second.rsm
+        )
 
     @classmethod
     def from_file(cfg_class, path: Path) -> "LCFG":
@@ -192,34 +221,75 @@ class LCFG(LAutoma, ABC):
         return cfg_class(CFG.from_text(string))
 
     def set_starting(self, starting: LSet) -> "LCFG":
-        raise NotImplementedError("Cant change CFG starting symbols after creation in \"set_starting\"")
+        raise NotImplementedError(
+            'Cant change CFG starting symbols after creation in "set_starting"'
+        )
 
     def set_final(self, final: LSet) -> "LCFG":
-        raise NotImplementedError("Cant change CFG final symbols after creation in \"set_final\"")
+        raise NotImplementedError(
+            'Cant change CFG final symbols after creation in "set_final"'
+        )
 
     def add_starting(self, starting: LSet) -> "LCFG":
-        raise NotImplementedError("Cant change CFG starting symbols after creation in \"add_starting\"")
+        raise NotImplementedError(
+            'Cant change CFG starting symbols after creation in "add_starting"'
+        )
 
     def add_final(self, final: LSet) -> "LCFG":
-        raise NotImplementedError("Cant change CFG final symbols after creation in \"add_final\"")
+        raise NotImplementedError(
+            'Cant change CFG final symbols after creation in "add_final"'
+        )
 
     def starting(self) -> "LSet":
-        return LSet({state.value for state in self.rsm.subautomata[self.rsm.starting_symbol].start_states})
+        return LSet(
+            {
+                state.value
+                for state in self.rsm.subautomata[self.rsm.starting_symbol].start_states
+            }
+        )
 
     def final(self) -> "LSet":
-        return LSet({state.value for state in self.rsm.subautomata[self.rsm.starting_symbol].final_states})
+        return LSet(
+            {
+                state.value
+                for state in self.rsm.subautomata[self.rsm.starting_symbol].final_states
+            }
+        )
 
     def reachables(self) -> "LSet":
-        return LSet({LPair(state_from.value, state_to.value) for (state_from, state_to) in reachables(self.rsm)})
+        return LSet(
+            {
+                LPair(state_from.value, state_to.value)
+                for (state_from, state_to) in reachables(self.rsm)
+            }
+        )
 
     def marks(self) -> "LSet":
-        return LSet({edge[2]["label"] for subautoma in self.rsm.subautomatons.values() for edge in subautomata.edges.data})
+        return LSet(
+            {
+                edge[2]["label"]
+                for subautoma in self.rsm.subautomatons.values()
+                for edge in subautomata.edges.data
+            }
+        )
 
     def edges(self) -> "LSet":
-        return LSet({LTriple(edge[0], edge[2]["label"], edge[1]) for subautoma in self.rsm.subautomatons.values() for edge in subautoma.edges.data})
+        return LSet(
+            {
+                LTriple(edge[0], edge[2]["label"], edge[1])
+                for subautoma in self.rsm.subautomatons.values()
+                for edge in subautoma.edges.data
+            }
+        )
 
     def nodes(self) -> "LSet":
-        return LSet({state.value for subautoma in self.rsm.subautomatons.values() for state in subautoma.states})
+        return LSet(
+            {
+                state.value
+                for subautoma in self.rsm.subautomatons.values()
+                for state in subautoma.states
+            }
+        )
 
     def intersect(self, second: "LAutoma") -> "LCFG":
         if isinstance(second, LFiniteAutoma):
@@ -240,6 +310,7 @@ class LCFG(LAutoma, ABC):
         raise TypeError("Cant concat CFG with FA")
 
     __repr__ = __str__
+
 
 class LFiniteAutoma(LAutoma, ABC):
     def __init__(self, nfa: NondeterministicFiniteAutomaton, ttype=None):
@@ -269,29 +340,65 @@ class LFiniteAutoma(LAutoma, ABC):
         if isinstance(None, starting.type):
             starting = LSet({state.value for state in self.nfa.states})
         if self.type != starting.type:
-            raise TypeError(f"To \"set_starting\" expected set of elemets of type {self.type}, but gotted {starting.type}")
+            raise TypeError(
+                f'To "set_starting" expected set of elemets of type {self.type}, but gotted {starting.type}'
+            )
 
-        return LFiniteAutoma(NondeterministicFiniteAutomaton(states=copy(self.nfa.states), input_symbols=copy(self.nfa.symbols), start_state=starting.set, final_states=copy(self.nfa.final_states)))
+        return LFiniteAutoma(
+            NondeterministicFiniteAutomaton(
+                states=copy(self.nfa.states),
+                input_symbols=copy(self.nfa.symbols),
+                start_state=starting.set,
+                final_states=copy(self.nfa.final_states),
+            )
+        )
 
     def set_final(self, final: LSet) -> "LFiniteAutoma":
         if isinstance(None, final.type):
             final = LSet({state.value for state in self.nfa.states})
         if self.type != final.type:
-            raise TypeError(f"To \"set_final\" expected set of elemets of type {self.type}, but gotted {final.type}")
+            raise TypeError(
+                f'To "set_final" expected set of elemets of type {self.type}, but gotted {final.type}'
+            )
 
-        return LFiniteAutoma(NondeterministicFiniteAutomaton(states=copy(self.nfa.states), input_symbols=copy(self.nfa.symbols), start_state=copy(self.nfa.start_states), final_states=final.set))
+        return LFiniteAutoma(
+            NondeterministicFiniteAutomaton(
+                states=copy(self.nfa.states),
+                input_symbols=copy(self.nfa.symbols),
+                start_state=copy(self.nfa.start_states),
+                final_states=final.set,
+            )
+        )
 
     def add_starting(self, starting: LSet) -> "LFiniteAutoma":
         if isinstance(None, starting.type) and self.type != starting.type:
-            raise TypeError(f"To \"add_starting\" expected set of elemets of type {self.type}, but gotted {starting.type}")
+            raise TypeError(
+                f'To "add_starting" expected set of elemets of type {self.type}, but gotted {starting.type}'
+            )
 
-        return LFiniteAutoma(NondeterministicFiniteAutomaton(states=copy(self.nfa.states), input_symbols=copy(self.nfa.symbols), start_state=copy(self.nfa.start_states).union(starting.set), final_states=copy(self.nfa.final_states)))
+        return LFiniteAutoma(
+            NondeterministicFiniteAutomaton(
+                states=copy(self.nfa.states),
+                input_symbols=copy(self.nfa.symbols),
+                start_state=copy(self.nfa.start_states).union(starting.set),
+                final_states=copy(self.nfa.final_states),
+            )
+        )
 
     def add_final(self, final: LSet) -> "LFiniteAutoma":
         if isinstance(None, final.type) and self.type != final.type:
-            raise TypeError(f"To \"final\" expected set of elemets of type {self.type}, but gotted {final.type}")
+            raise TypeError(
+                f'To "final" expected set of elemets of type {self.type}, but gotted {final.type}'
+            )
 
-        return LFiniteAutoma(NondeterministicFiniteAutomaton(states=copy(self.nfa.states), input_symbols=copy(self.nfa.symbols), start_state=copy(self.nfa.start_states), final_states=copy(self.nfa.final_states).union(final.set)))
+        return LFiniteAutoma(
+            NondeterministicFiniteAutomaton(
+                states=copy(self.nfa.states),
+                input_symbols=copy(self.nfa.symbols),
+                start_state=copy(self.nfa.start_states),
+                final_states=copy(self.nfa.final_states).union(final.set),
+            )
+        )
 
     def starting(self) -> "LSet":
         return LSet({state.value for state in self.nfa.start_states})
@@ -300,7 +407,10 @@ class LFiniteAutoma(LAutoma, ABC):
         return LSet({state.value for state in self.nfa.final_states})
 
     def reachables(self) -> "LSet":
-        result = set(LPair(state.value, state.value) for state in self.nfa.start_states.intersection(self.nfa.final_states))
+        result = set(
+            LPair(state.value, state.value)
+            for state in self.nfa.start_states.intersection(self.nfa.final_states)
+        )
         binary_matrix = build_binary_matrix_by_nfa(self.nfa)
         for node_from_index, node_to_index in zip(*transitive_closure(binary_matrix)):
             node_from = binary_matrix.states[node_from_index]
@@ -314,16 +424,23 @@ class LFiniteAutoma(LAutoma, ABC):
         return LSet({symbol.value for symbol in self.nfa.symbols})
 
     def edges(self) -> "LSet":
-        return LSet({LTriple(state_from, mark, state_to) for state_from, items in self.nfa.to_dict().items()
-        for mark, set_state_to in items.items()
-        for state_to in (set_state_to if isinstance(set_state_to, set) else {set_state_to})})
+        return LSet(
+            {
+                LTriple(state_from, mark, state_to)
+                for state_from, items in self.nfa.to_dict().items()
+                for mark, set_state_to in items.items()
+                for state_to in (
+                    set_state_to if isinstance(set_state_to, set) else {set_state_to}
+                )
+            }
+        )
 
     def nodes(self) -> "LSet":
         return LSet({state.value for state in self.nfa.symbols})
 
     def intersect(self, second: "LAutoma") -> "LFiniteAutoma":
         if self.type != second.type:
-            raise TypeError("To \"intersect\" both arguments must be same type")
+            raise TypeError('To "intersect" both arguments must be same type')
         if isinstance(second, LFiniteAutoma):
             return LFiniteAutoma(intersect_of_automata(self.nfa, second.nfa))
         else:
@@ -331,17 +448,21 @@ class LFiniteAutoma(LAutoma, ABC):
 
     def union(self, second: "LAutoma") -> "LFiniteAutoma":
         if self.type != second.type:
-            raise TypeError("To \"union\" both arguments must be same type")
+            raise TypeError('To "union" both arguments must be same type')
         if isinstance(second, LFiniteAutoma):
-            return LFiniteAutoma(self.nfa.union(second.nfa).to_deterministic(), self.type)
+            return LFiniteAutoma(
+                self.nfa.union(second.nfa).to_deterministic(), self.type
+            )
         else:
             return second.union(self)
 
     def concat(self, second: "LAutoma") -> "LFiniteAutoma":
         if self.type != second.type:
-            raise TypeError("To \"concat\" both arguments must be same type")
+            raise TypeError('To "concat" both arguments must be same type')
         if isinstance(second, LFiniteAutoma):
-            return LFiniteAutoma(self.nfa.concatenate(second.nfs).to_deterministic(), self.type)
+            return LFiniteAutoma(
+                self.nfa.concatenate(second.nfs).to_deterministic(), self.type
+            )
         else:
             return second.concat(self)
 

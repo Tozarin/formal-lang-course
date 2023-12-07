@@ -2,22 +2,27 @@ from dataclasses import dataclass
 
 from project.interpret.types import LPair, LTriple
 
+
 @dataclass
 class Pattern:
     pass
+
 
 @dataclass
 class PAny(Pattern):
     pass
 
+
 @dataclass
 class PName(Pattern):
     name: str
+
 
 @dataclass
 class PPair(Pattern):
     first: Pattern
     second: Pattern
+
 
 @dataclass
 class PTriple(Pattern):
@@ -25,8 +30,9 @@ class PTriple(Pattern):
     mark: PAny | PName
     final: Pattern
 
+
 def match(pattern: Pattern, value) -> dict:
-    match[pattern, value]:
+    match [pattern, value]:
         case [PAny(), _]:
             return {}
         case [PName(name), _]:

@@ -3,7 +3,7 @@ from pathlib import Path
 from antlr4 import ParserRuleContext
 
 from project.interpret.LenguageVisitor import LenguageVisitor
-from project.interpret.LenguageParser import LenguageParser 
+from project.interpret.LenguageParser import LenguageParser
 from project.interpret.types import LSet, LPair, LTriple, LCFG, LFiniteAutoma
 from project.interpret.patterns import PAny, PName, PPair, PTriple, match
 
@@ -68,21 +68,29 @@ class InterpretVisitor(LenguageVisitor):
         return LPair(self.visit(contex.expr(0)), self.visit(contex.expr(1)))
 
     def visitTriple(self, contex: LenguageParser.TripleContext):
-        return LTriple(self.visit(contex.expr(0)), self.visit(contex.expr(1)), self.visit(contex.expr(2)))
+        return LTriple(
+            self.visit(contex.expr(0)),
+            self.visit(contex.expr(1)),
+            self.visit(contex.expr(2)),
+        )
 
     def visitIn(self, contex: LenguageParser.InContext):
         elem = self.visit(contex.expr(0))
         elems = self.visit(contex.expr(1))
 
         if not isinstance(elems, LSet):
-            raise TypeError(f"Expected set type at left argument of \"in\", not: {type(elems)}")
+            raise TypeError(
+                f'Expected set type at left argument of "in", not: {type(elems)}'
+            )
 
         return elem in elems
 
     def visitNot(self, contex: LenguageParser.NotContext):
         value = self.visit(contex.expr())
         if not isinstance(value, bool):
-            raise TypeError(f"Expected bool type at argument of \"not\", not: {type(value)}")
+            raise TypeError(
+                f'Expected bool type at argument of "not", not: {type(value)}'
+            )
 
         return not value
 
@@ -91,9 +99,13 @@ class InterpretVisitor(LenguageVisitor):
         right_value = self.visit(contex.expr(1))
 
         if not isinstance(left_value, bool):
-            raise TypeError(f"Expected bool type at left argument of \"or\", not: {type(value)}")
+            raise TypeError(
+                f'Expected bool type at left argument of "or", not: {type(value)}'
+            )
         if not isinstance(right_value, bool):
-            raise TypeError(f"Expected bool type at right argument of \"or\", not: {type(value)}")
+            raise TypeError(
+                f'Expected bool type at right argument of "or", not: {type(value)}'
+            )
 
         return left_value or right_value
 
@@ -102,17 +114,23 @@ class InterpretVisitor(LenguageVisitor):
         right_value = self.visit(contex.expr(1))
 
         if not isinstance(left_value, bool):
-            raise TypeError(f"Expected bool type at left argument of \"and\", not: {type(value)}")
+            raise TypeError(
+                f'Expected bool type at left argument of "and", not: {type(value)}'
+            )
         if not isinstance(right_value, bool):
-            raise TypeError(f"Expected bool type at right argument of \"and\", not: {type(value)}")
+            raise TypeError(
+                f'Expected bool type at right argument of "and", not: {type(value)}'
+            )
 
-        return left_value and right_value        
+        return left_value and right_value
 
     def visitSet(self, contex: LenguageParser.SetContext):
         return LSet({self.visit(elem) for elem in contex.expr()})
 
     def visitRange(self, contex: LenguageParser.RangeContext):
-        return LSet(range(int(contex.INT(0).getText()), int(contex.INT(1).getText()) + 1))
+        return LSet(
+            range(int(contex.INT(0).getText()), int(contex.INT(1).getText()) + 1)
+        )
 
     def visitStarting(self, contex: LenguageParser.StartingContext):
         return self.visit(contex.expr()).starting()
@@ -140,7 +158,7 @@ class InterpretVisitor(LenguageVisitor):
             return self.visit(contex.expr(1))
 
         if not isinstance(elems, LSet):
-            raise TypeError(f"To \"map\" first argument must be set, not {type(elems)}")
+            raise TypeError(f'To "map" first argument must be set, not {type(elems)}')
 
         mapped = set()
         for elem in elems.set:
@@ -160,7 +178,9 @@ class InterpretVisitor(LenguageVisitor):
             return self.visit(contex.expr(1))
 
         if not isinstance(elems, LSet):
-            raise TypeError(f"To \"filter\" first argument must be set, not {type(elems)}")
+            raise TypeError(
+                f'To "filter" first argument must be set, not {type(elems)}'
+            )
 
         filtred = set()
         for elem in elems.set:
@@ -174,7 +194,7 @@ class InterpretVisitor(LenguageVisitor):
 
             if result:
                 filtred.add(elem)
-            
+
             self.pop_env()
 
         return LSet(filtred)
@@ -194,7 +214,9 @@ class InterpretVisitor(LenguageVisitor):
     def visitLoad_dot(self, contex: LenguageParser.Load_dotContext):
         name = contex.STRING().getText()[1:-1]
         if not isinstance(name, str):
-            raise TypeError(f"To \"load_dot\" argument must be string type, not {type(name)}")
+            raise TypeError(
+                f'To "load_dot" argument must be string type, not {type(name)}'
+            )
 
         path = Path(name)
         if path.name.startswith("cfg"):
@@ -205,7 +227,9 @@ class InterpretVisitor(LenguageVisitor):
     def visitLoad_graph(self, contex: LenguageParser.Load_graphContext):
         name = contex.STRING().getText()[1:-1]
         if not isinstance(name, str):
-            raise TypeError(f"To \"load_graph\" argument must be string type, not {type(name)}")
+            raise TypeError(
+                f'To "load_graph" argument must be string type, not {type(name)}'
+            )
 
         return LFiniteAutoma.from_data(name)
 
@@ -221,13 +245,15 @@ class InterpretVisitor(LenguageVisitor):
     def visitStar(self, contex: LenguageParser.StarContext):
         automa = self.visit(contex.expr())
         if not isinstance(automa, LFiniteAutoma):
-            raise TypeError(f"Argument of \"*\" must be FiniteAutoma type, not {type(automa)}")
+            raise TypeError(
+                f'Argument of "*" must be FiniteAutoma type, not {type(automa)}'
+            )
 
         return automa.star()
 
     def visitParents(self, contex: LenguageParser.ParentsContext):
         return self.visit(contex.expr())
-    
+
     def visitAny(self, contex: LenguageParser.AnyContext):
         return PAny()
 
@@ -238,4 +264,8 @@ class InterpretVisitor(LenguageVisitor):
         return PPair(self.visit(contex.pattern(0)), self.visit(contex.pattern(1)))
 
     def visitUntriple(self, contex: LenguageParser.UntripleContext):
-        return PTriple(self.visit(contex.pattern(0)), self.visit(contex.pattern(1)), self.visit(contex.pattern(2)))
+        return PTriple(
+            self.visit(contex.pattern(0)),
+            self.visit(contex.pattern(1)),
+            self.visit(contex.pattern(2)),
+        )
