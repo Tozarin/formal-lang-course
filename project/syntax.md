@@ -85,14 +85,12 @@ graph ->
     | graph 'set_final' set
     | graph 'add_starting' set
     | graph 'add_final' set
-    | 'load_dot' var
     | 'load_dot' PATH
-    | 'load_graph' var
     | 'load_graph' STRING
     | graph 'intersect' graph           // пересечение
     | graph 'union' graph               // объединение
     | graph 'concat' graph              // конкатенация
-    | 'star' graph                      // звёздочка Клини
+    | graph 'star'                      // звёздочка Клини
     | '(' graph ')'
 
 bool ->
@@ -157,7 +155,7 @@ print result
 grammar := g"S -> a S b | a b"
 regex := r"a b"
 
-result := grammar intersect regex reachables map (((u, _), (v, _)) => (u, v))
+result := grammar intersect regex reachables
 
 print result
 ```

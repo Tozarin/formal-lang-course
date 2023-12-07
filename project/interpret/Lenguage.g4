@@ -8,7 +8,7 @@ statement :
     ;
 
 expr :
-      VAR                                       # val
+      VAR                                       # var
     | INT                                       # int
     | STRING                                    # string
     | BOOL                                      # bool
@@ -34,8 +34,8 @@ expr :
     | expr SETFINAL expr                        # set_final
     | expr ADDSTARTING expr                     # add_starting
     | expr ADDFINAL expr                        # add_final
-    | LOADDOT (STRING | VAR)                    # load_dot
-    | LOADGRAPH (STRING | VAR)                  # load_graph
+    | LOADDOT STRING                            # load_dot
+    | LOADGRAPH STRING                          # load_graph
     | expr INTER expr                           # inter
     | expr UNION expr                           # union
     | expr CONCAT expr                          # concat
@@ -77,7 +77,7 @@ IN : 'in';
 INTER : 'intersect';
 UNION : 'union';
 CONCAT : 'concat';
-STAR : '*';
+STAR : 'star';
 
 EQ : ':=';
 COMMA : ',';
