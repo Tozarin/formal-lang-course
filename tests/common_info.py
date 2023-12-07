@@ -1,3 +1,9 @@
+from pathlib import Path
+
+from pyformlang.finite_automaton import State
+
+from project.interpret.types import LSet, LPair, LTriple, LCFG, LFiniteAutoma
+
 path_to_results = "tests/results/"
 path_to_automata = path_to_results + "automata/"
 path_to_graphs = path_to_results + "graphs/"
@@ -271,6 +277,7 @@ build_binary_matrix_rsm = [
 ]
 
 parser_test_true = [
+    "",
     "x := y",
     "x := _y",
     "x := Y",
@@ -293,13 +300,12 @@ parser_test_true = [
     "x := set filter (v => v in <|1 .. 10|>) ",
     'x := load_dot "some.dot"',
     "x := a and b",
-    "x := a*",
+    "x := a star",
     "ms := skos marks filter (mark => mark in (wine marks))",
     "result := grammar intersect regex reachables map (((u, _), (v, _)) => (u, v))",
     "result := graph reachables map ((_, f) => f)",
 ]
 parser_test_false = [
-    "",
     "x := 1y",
     "x := graph set_starting",
     "x := graph set_starting a b",
@@ -311,3 +317,40 @@ parser_test_false = [
 
 parser_dot_test = 'x := load_graph "skos" set_starting <|1 .. 10|> reachables map ((_, f) => f)\nprint x'
 parser_dot_test_example = "ast_test_example.dot"
+
+interpret_test = [
+    ("(true)", True),
+    ("(((1, 2)))", LPair(1, 2)),
+    ('("(a | b)*")', "(a | b)*"),
+    ("(1, 4)", LPair(1, 4)),
+    ('(1, "aboba", 2)', LTriple(1, "aboba", 2)),
+    ("<|1|>", LSet({1})),
+    ("<|1..3|>", LSet(range(1, 4))),
+    ("true or false", True),
+    ("true and false", False),
+    ("not true", False),
+    ("1 in <|-1 .. 10|>", True),
+    ('r"a b"', LFiniteAutoma.from_string("a b")),
+    (
+        '(load_dot "' + path_to_graphs + 'graph_to_gen_automata.dot")',
+        LFiniteAutoma.from_file(Path(path_to_graphs + "graph_to_gen_automata.dot")),
+    ),
+    ('(load_graph "skos"))', LFiniteAutoma.from_data("skos")),
+    ('((load_graph "skos" set_starting <|1|>) starting)', LSet({1})),
+    ('((load_graph "skos" set_final <|1|>) final)', LSet({1})),
+    ('(r"a b" nodes)', LSet({"a", "b"})),
+    (
+        '(r"a b" edges)',
+        LSet(
+            {
+                LTriple(State("2;3"), "b", State("1")),
+                LTriple(State("0"), "a", State("2;3")),
+            }
+        ),
+    ),
+    ('(r"a b" marks)', LSet({"a", "b"})),
+    ("<|1, 2|> map (e => e in <|2, 3|>)", LSet({False, True})),
+    ("<|1, 2|> failter (_ => true", LSet({1, 2})),
+    ("<|(1, 10), (2, 10)|> map ((s, _) => s)", LSet({1, 2})),
+    ("<|(0, 1, 0), (0, 2, 0)|> map ((_, m, _) => m)", LSet({1, 2})),
+]
