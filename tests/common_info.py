@@ -30,8 +30,13 @@ nondeterministic_automata_for_build_test = [
 ]
 
 transitive_closure_test = [
-    ([(0, "b", 0), (0, "a", 1), (1, "b", 1), (1, "a", 0)], [0], [1], [[1, 1], [1, 1]]),
-    ([(0, "a", 1), (1, "b", 0)], [0], [1, 2], [[1, 1, 0], [1, 1, 0], [0, 0, 0]]),
+    (
+        [(0, "b", 0), (0, "a", 1), (1, "b", 1), (1, "a", 0)],
+        [0],
+        [1],
+        {(0, 1), (1, 0), (1, 1), (0, 0)},
+    ),
+    ([(0, "a", 1), (1, "b", 0)], [0], [1, 2], {(0, 1), (1, 0), (1, 1), (0, 0)}),
 ]
 
 # first_cycle, second_cycle, (first_cycle_mark, second_cycle_mark), regular_expression, starting_states, finale_states, expected_output
@@ -235,5 +240,32 @@ helling_examples = [
         "S",
         "eighth.grammar",
         {("1", "3"), ("0", "3")},
+    ),
+]
+
+build_binary_matrix_rsm = [
+    ("S -> a", [(("S", 0), True, False), (("S", 1), False, True)], {"a": [[0, 1]]}),
+    (
+        "S -> A\nA -> B C\nB -> b\nC -> c",
+        [
+            (("A", 0), True, False),
+            (("A", 1), False, True),
+            (("A", 2), False, False),
+            (("A", 3), False, False),
+            (("B", 0), True, False),
+            (("B", 1), False, True),
+            (("C", 0), True, False),
+            (("C", 1), False, True),
+            (("S", 0), True, False),
+            (("S", 1), False, True),
+        ],
+        {
+            "A": [[8, 9]],
+            "B": [[0, 2]],
+            "C": [[3, 1]],
+            "b": [[4, 5]],
+            "c": [[6, 7]],
+            "epsilon": [[2, 3]],
+        },
     ),
 ]

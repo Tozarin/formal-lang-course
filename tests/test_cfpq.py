@@ -7,6 +7,8 @@ from project.grammar.cfpq import (
     helling_request,
     matrix_constrained_transitive_closure,
     matrix_request,
+    tensor_constrained_transitive_closure,
+    tensor_request,
 )
 from project.utils.graph_utils import load_from_dot
 from project.utils.grammar_utils import read_contex_free_grammar_from_file
@@ -64,6 +66,29 @@ def test_matrix_constrained_transitive_closure():
         )
 
 
+def test_tensor_constrained_transitive_closure():
+
+    for (
+        test_graph_name,
+        test_grammar_name,
+        expected_answer,
+    ) in constrained_transitive_closure_examples:
+        test_graph = load_from_dot(path_to_graphs + test_graph_name)
+        test_grammar = read_contex_free_grammar_from_file(
+            path_to_grammars + test_grammar_name
+        )
+
+        expected_answer = {
+            (start_node, Variable(variable), end_node)
+            for start_node, variable, end_node in expected_answer
+        }
+
+        assert (
+            tensor_constrained_transitive_closure(test_graph, test_grammar)
+            == expected_answer
+        )
+
+
 def test_helling_request():
 
     for (
@@ -108,6 +133,33 @@ def test_matrix_request():
 
         assert (
             matrix_request(
+                test_graph,
+                test_grammar,
+                starting_vertices,
+                final_vertices,
+                starting_symbol,
+            )
+            == expected_answer
+        )
+
+
+def test_tensor_request():
+
+    for (
+        test_graph_name,
+        starting_vertices,
+        final_vertices,
+        starting_symbol,
+        test_grammar_name,
+        expected_answer,
+    ) in helling_examples:
+        test_graph = load_from_dot(path_to_graphs + test_graph_name)
+        test_grammar = read_contex_free_grammar_from_file(
+            path_to_grammars + test_grammar_name
+        )
+
+        assert (
+            tensor_request(
                 test_graph,
                 test_grammar,
                 starting_vertices,

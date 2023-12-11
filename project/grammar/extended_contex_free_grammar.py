@@ -43,11 +43,11 @@ def extend_contex_free_grammar(
             contex_free_grammar, starting_nonterminal
         )
 
-    starting_symbol = (
-        contex_free_grammar.start_symbol
-        if contex_free_grammar.start_symbol is not None
-        else Variable("S")
-    )
+    if contex_free_grammar.start_symbol is not None:
+        starting_symbol = contex_free_grammar.start_symbol
+    else:
+        starting_symbol = Variable("S")
+
     nonterminals = set(contex_free_grammar.variables)
     nonterminals.add(starting_symbol)
 

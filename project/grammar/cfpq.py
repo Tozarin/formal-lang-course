@@ -5,6 +5,18 @@ from networkx import Graph
 from scipy.sparse import dok_array, csr_array, eye
 
 from project.utils.grammar_utils import contex_free_to_weak_chomsky_form
+from project.grammar.recursive_state_machines import (
+    build_binary_matrix_by_rsm,
+    minimize_recursive_state_machine,
+    recursive_state_machine_from_extended_contex_free_grammar,
+)
+from project.utils.bin_matrix_utils import (
+    build_binary_matrix_by_nfa,
+    transitive_closure,
+    intersect_of_automata_by_binary_matixes,
+)
+from project.utils.automata_utils import gen_nfa_by_graph
+from project.grammar.extended_contex_free_grammar import extend_contex_free_grammar
 
 
 def helling_request(
@@ -67,6 +79,39 @@ def matrix_request(
         graph,
         request,
         matrix_constrained_transitive_closure,
+        starting_vertices,
+        final_vertices,
+        starting_symbol,
+    )
+
+
+def tensor_request(
+    graph: Graph,
+    request: CFG,
+    starting_vertices: set = None,
+    final_vertices: set = None,
+    starting_symbol: str | Variable = "S",
+) -> set:
+
+    """
+    From given starting and finale vertices finds pairs that are connected by path
+    satisfying contex free grammar in given graph by tensor algorithm
+
+    Args:
+        graph: graph to find paths
+        request: contex grammar that represent request
+        starting_vertices: set of starting vertices
+        final_vertices: set of finale vertices
+        starting_symbol: starting nonterminal to grammar
+
+    Returns:
+        Set of pair of vertices that connected by satisfying path
+    """
+
+    return cfpq_request_with_custom_transitive_closure(
+        graph,
+        request,
+        tensor_constrained_transitive_closure,
         starting_vertices,
         final_vertices,
         starting_symbol,
@@ -262,5 +307,88 @@ def matrix_constrained_transitive_closure(
                     reversed_nodes_indexes[index_to],
                 )
             )
+
+    return result
+
+
+def tensor_constrained_transitive_closure(
+    graph: Graph, contex_free_grammar: CFG
+) -> set:
+
+    """
+    Calculates transitive closure of graph with constrained by given grammar
+    by tensor algorithm
+
+    Args:
+        graph: graph with necessary information
+        contex_free_grammar: contex free grammar that represent constrains
+
+    Returns:
+        Transitive closure of graph
+    """
+
+    binary_matrix_of_rsm = build_binary_matrix_by_rsm(
+        minimize_recursive_state_machine(
+            recursive_state_machine_from_extended_contex_free_grammar(
+                extend_contex_free_grammar(contex_free_grammar),
+                contex_free_grammar.start_symbol,
+            )
+        )
+    )
+    binary_matrix_of_graph = build_binary_matrix_by_nfa(gen_nfa_by_graph(graph))
+    count_of_graph_states = len(binary_matrix_of_graph.states)
+
+    diagonal = csr_array(eye(len(binary_matrix_of_graph.states), dtype=bool))
+    for variable in contex_free_grammar.get_nullable_symbols():
+        binary_matrix_of_graph.matrix[variable.value] += diagonal
+
+    transitive_closure_size = 0
+    while True:
+        transitive_closure_intersects = list(
+            zip(
+                *transitive_closure(
+                    intersect_of_automata_by_binary_matixes(
+                        binary_matrix_of_rsm, binary_matrix_of_graph
+                    )
+                )
+            )
+        )
+
+        if len(transitive_closure_intersects) == transitive_closure_size:
+            break
+        transitive_closure_size = len(transitive_closure_intersects)
+
+        for i, j in transitive_closure_intersects:
+            rsm_i, rsm_j = i // count_of_graph_states, j // count_of_graph_states
+            start_state, final_state = (
+                binary_matrix_of_rsm.states[rsm_i],
+                binary_matrix_of_rsm.states[rsm_j],
+            )
+            if start_state.is_start and final_state.is_final:
+                value = start_state.value[0]
+
+                graph_i, graph_j = i % count_of_graph_states, j % count_of_graph_states
+                graph_matrix = csr_array(
+                    ([True], ([graph_i], [graph_j])),
+                    shape=((count_of_graph_states, count_of_graph_states)),
+                    dtype=bool,
+                )
+
+                if value in binary_matrix_of_graph.matrix:
+                    binary_matrix_of_graph.matrix[value] += graph_matrix
+                else:
+                    binary_matrix_of_graph.matrix[value] = graph_matrix.copy()
+
+    result = set()
+    for variable, matrix in binary_matrix_of_graph.matrix.items():
+        if isinstance(variable, Variable):
+            for i, j in zip(*matrix.nonzero()):
+                result.add(
+                    (
+                        binary_matrix_of_graph.states[i].value,
+                        variable,
+                        binary_matrix_of_graph.states[j].value,
+                    )
+                )
 
     return result
