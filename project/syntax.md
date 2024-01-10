@@ -38,6 +38,8 @@ expr =
     | GetVertexes of expr           // получение всех вершин
     | GetEdges of expr              // получение всех граней
     | GetMarks of expr              // получение всех меток на гранях
+    | Pair of expr * expr           // пары
+    | Triple of expr * expr * expr  // тройки
 
 const =
     | Regex of regex                // регулярное выражение, заданное регулярным выражением
@@ -51,7 +53,8 @@ lambda = pattern * expr
 pattern =
     | Any                           // _
     | Name of name                  // именованное значение
-    | Pair of pattern * pattern     // пары
+    | Pair of pattern * pattern     // пары, тройки
+    | Triple of pattern * pattern * pattern
 ```
 
 ## Грамматика
@@ -71,6 +74,7 @@ expr ->
     | bool
     | set
     | '(' expr ',' expr ')'
+    | '(' expr ',' expr ',' expr ')'
     | '(' expr ')'
 
 graph ->
@@ -81,14 +85,12 @@ graph ->
     | graph 'set_final' set
     | graph 'add_starting' set
     | graph 'add_final' set
-    | 'load_dot' var
     | 'load_dot' PATH
-    | 'load_graph' var
     | 'load_graph' STRING
     | graph 'intersect' graph           // пересечение
     | graph 'union' graph               // объединение
     | graph 'concat' graph              // конкатенация
-    | 'star' graph                      // звёздочка Клини
+    | graph 'star'                      // звёздочка Клини
     | '(' graph ')'
 
 bool ->
@@ -119,6 +121,7 @@ petterin ->
     | '_'
     | var
     | '(' pattern ',' pattern ')'
+    | '(' pattern ',' pattern ',' pattern ')'
 
 var -> [a-zA-Z_][a-zA-Z0-9_]*
 
@@ -152,7 +155,7 @@ print result
 grammar := g"S -> a S b | a b"
 regex := r"a b"
 
-result := grammar intersect regex reachables map (((u, _), (v, _)) => (u, v))
+result := grammar intersect regex reachables
 
 print result
 ```

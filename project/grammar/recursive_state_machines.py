@@ -2,8 +2,10 @@ from collections import namedtuple
 from pathlib import Path
 
 from scipy.sparse import dok_array
+from pyformlang.cfg import Variable
+from pyformlang.finite_automaton import State
 
-from project.utils.bin_matrix_utils import StateInfo, BinaryMatrix
+from project.utils.bin_matrix_utils import StateInfo, BinaryMatrix, transitive_closure
 from project.grammar.extended_contex_free_grammar import (
     ExtendedContexFreeGrammar,
     extended_contex_free_grammar_from_string,
@@ -127,3 +129,61 @@ def build_binary_matrix_by_rsm(
         matrixes[key] = matrixes[key].tocsr()
 
     return BinaryMatrix(states, matrixes)
+
+
+def reachables(recursive_state_machine: RecursiveStateMachine) -> set:
+
+    """
+    Finds reacheble states of given recursive state machine
+
+    Args:
+        recursive_state_machine: recursive state machine
+    Returns:
+        Set of pairs of state: from to reachecble
+    """
+
+    binary_matrix = build_binary_matrix_by_rsm(recursive_state_machine)
+    nonterminals = {}
+    result = set()
+
+    for variable in set(recursive_state_machine.subautomatons).union(
+        binary_matrix.matrix
+    ):
+        if not isinstance(variable, Variable):
+            continue
+
+        starting_final = (
+            recursive_state_machine.subautomatons[variable].start_states.intersection(
+                recursive_state_machine.subautomatons[variable].final_states
+            )
+            if variable in recursive_state_machine.subautomatons
+            else set()
+        )
+
+        if len(starting_final) == 0 and variable in binary_matrix.matrix:
+            nonterminals[variable] = binary_matrix.matrix.pop(variable)
+        if variable == recursive_state_machine.starting_symbol:
+            result |= {(state, state) for state in starting_final}
+
+    while True:
+        prev_len = len(nonterminals)
+
+        tc_indexes = zip(*transitive_closure(binary_matrix))
+        for node_from_index, node_to_index in tc_indexes:
+            node_from = binary_matrix.states[node_from_index]
+            node_to = binary_matrix.states[node_to_index]
+            if node_from.is_start and node_to.is_final:
+                variable_from, state_from = node_from.value
+                variable_to, state_to = node_to.value
+                assert variable_from == variable_to
+                if variable_from in nonterminals:
+                    binary_matrix.matrix[variable_from] = nonterminals.pop(
+                        variable_from
+                    )
+                if variable_from == recursive_state_machine.starting_symbol:
+                    result.add((State(state_from), State(state_to)))
+
+        if len(nonterminals) == prev_len:
+            break
+
+    return result

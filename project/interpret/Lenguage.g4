@@ -3,52 +3,51 @@ grammar Lenguage;
 programm : EOL* ((COMMENT EOL+)* statement COMMENT? EOL+ (COMMENT EOL+)*)* (statement COMMENT?)? EOF;
 
 statement :
-    | VAR EQ expr
-    | PRINT expr
+      VAR EQ expr                               # bind
+    | PRINT expr                                # print
     ;
 
 expr :
-    | VAR
-    | INT
-    | STRING
-    | BOOL
-    | REGEX
-    | CFG
-    | LP expr COMMA expr RP
-    | expr IN expr
-    | NOT expr
-    | expr OR expr
-    | expr AND expr
-    | LT RT
-    | LT expr (COMMA expr)* RT
-    | LT INT DOTS INT RT
-    | expr STARTING
-    | expr FINAL
-    | expr NODES
-    | expr EDGES
-    | expr MARKS
-    | expr REACHABLES
-    | expr MAP LP pattern ARROW expr RP
-    | expr FILTER LP pattern ARROW expr RP
-    | expr SETSTARTING expr
-    | expr SETFINAL expr
-    | expr ADDSTARTING expr
-    | expr ADDFINAL expr
-    | LOADDOT VAR
-    | LOADDOT STRING
-    | LOADGRAPH VAR
-    | LOADGRAPH STRING
-    | expr INTER expr
-    | expr UNION expr
-    | expr CONCAT expr
-    | expr STAR
-    | LP expr RP
+      VAR                                       # var
+    | INT                                       # int
+    | STRING                                    # string
+    | BOOL                                      # bool
+    | REGEX                                     # regex
+    | CFG                                       # cfg
+    | LP expr COMMA expr RP                     # pair
+    | LP expr COMMA expr COMMA expr RP          # triple
+    | expr IN expr                              # in
+    | NOT expr                                  # not
+    | expr OR expr                              # or
+    | expr AND expr                             # and
+    | LT (expr (COMMA expr)*)? RT               # set
+    | LT INT DOTS INT RT                        # range
+    | expr STARTING                             # starting
+    | expr FINAL                                # final
+    | expr NODES                                # nodes
+    | expr EDGES                                # edges
+    | expr MARKS                                # marks
+    | expr REACHABLES                           # reachables
+    | expr MAP LP pattern ARROW expr RP         # map
+    | expr FILTER LP pattern ARROW expr RP      # filter
+    | expr SETSTARTING expr                     # set_starting
+    | expr SETFINAL expr                        # set_final
+    | expr ADDSTARTING expr                     # add_starting
+    | expr ADDFINAL expr                        # add_final
+    | LOADDOT STRING                            # load_dot
+    | LOADGRAPH STRING                          # load_graph
+    | expr INTER expr                           # inter
+    | expr UNION expr                           # union
+    | expr CONCAT expr                          # concat
+    | expr STAR                                 # star
+    | LP expr RP                                # parents
     ;
 
 pattern :
-    | UNDER
-    | VAR
-    | LP pattern COMMA pattern RP
+      UNDER                                     # any
+    | VAR                                       # unvar
+    | LP pattern COMMA pattern RP               # unpair
+    | LP pattern COMMA pattern COMMA pattern RP # untriple
     ;
 
 PRINT : 'print';
@@ -78,7 +77,7 @@ IN : 'in';
 INTER : 'intersect';
 UNION : 'union';
 CONCAT : 'concat';
-STAR : '*';
+STAR : 'star';
 
 EQ : ':=';
 COMMA : ',';
