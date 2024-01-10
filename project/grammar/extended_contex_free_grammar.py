@@ -38,7 +38,7 @@ def extend_contex_free_grammar(
             contex_free_grammar, Variable(starting_nonterminal)
         )
 
-    if isinstance(contex_free_grammar, Path):
+    if isinstance(contex_free_grammar, str):
         contex_free_grammar = read_contex_free_grammar_from_file(
             contex_free_grammar, starting_nonterminal
         )

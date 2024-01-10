@@ -5,5 +5,5 @@
 ```shell
 pip install antlr4-tools
 
-antlr4 Lenguage.g4 -visitor -Dlanguage=Python3
+antlr4 Lenguage.g4 -Dlanguage=Python3
 ```
